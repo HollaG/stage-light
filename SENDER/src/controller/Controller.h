@@ -8,7 +8,8 @@ class Controller
 
     BaseDisplay *baseDisplay;
 
-    Light light = {0, 0, 0, 0, 0, 0};
+    Light light = {0, 0, 0, 0, 0, 0}; // light used in EDITING
+    // when we're not in EDIT mode, show the light from preset
 
     // TODO decide if we want to do this
     Light frozenLight = { 0, 0, 0, 0, 0, 0}; // When in saving screen, we should disable any modifications
@@ -31,6 +32,8 @@ class Controller
 
 
     int connectedCount = 0;
+
+    int mode = 0; // 0 = "locked, no edit", 1 = "edit"
 
     int saveInSlotIndex = -1;
     int saveInGroupIndex = -1;

@@ -13,10 +13,15 @@ class ButtonOverlayWidget : public BaseWidget
 public:
     std::string buttonLabel;
 
+    bool isButtonVisible = true;
+
     // Constructor
     ButtonOverlayWidget(int x, int y, std::string buttonLabel);
 
     void draw(Adafruit_SSD1306 *display);
 
     void updateLabel(std::string label);
+
+    void hideButton();
+    void showButton();
 };

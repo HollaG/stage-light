@@ -19,6 +19,7 @@ public:
     int nextIndex;
 
     int connectedCount;
+    int mode;
 
     std::string presetName;
 
@@ -37,7 +38,7 @@ public:
 
 
     // update 
-    void update(int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName);
+    void update(int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName, int mode);
     
 };
 

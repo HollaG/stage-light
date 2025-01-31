@@ -10,7 +10,7 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     strcpy(group.name, name);
     group.slotCount = 0;
 
-    Light light = {127, 127, 127};
+    Light light = {0, 0, 0};
     Slot slot = {light};
 
     group.slots[0] = slot;
@@ -56,7 +56,22 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
         // int blue = groups[groupIndex].slots[slotIndex].light.b;
         int slotCount = groups[groupIndex].slotCount;
 
-        baseDisplay->updateHomePage(display, light.r, light.g, light.b, slotIndex, slotCount, connectedCount, "");
+        // if editing, then display potentiometer lights, if not, display slot light
+        int r, g, b;
+        if (mode == 1)
+        {
+            r = light.r;
+            g = light.g;
+            b = light.b;
+        }
+        else
+        {
+            r = groups[groupIndex].slots[slotIndex].light.r;
+            g = groups[groupIndex].slots[slotIndex].light.g;
+            b = groups[groupIndex].slots[slotIndex].light.b;
+        }
+
+        baseDisplay->updateHomePage(display, r, g, b, slotIndex, slotCount, connectedCount, "", mode);
         break;
     };
     case 1:
@@ -78,23 +93,40 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
 
 Light Controller::getLight()
 {
-    return groups[groupIndex].slots[slotIndex].light;
+    if (mode == 0)
+    {
+        return groups[groupIndex].slots[slotIndex].light;
+    }
+    else
+    {
+        return light;
+    }
 }
 
 void Controller::onScreenLeft()
 {
     // 0 --> SAVE
 
+    Serial.println("DEBUG: Screen Left Button Pressed");
+
     switch (currentPageIndex)
     {
     case 0:
     {
         // go to Saving page
-        currentPageIndex = 1;
+        if (mode == 1)
+        {
 
-        this->saveInSlotIndex = slotIndex;
-        Serial.printf("DEBUG: SaveInSlotIndex %d, slotIndex %d\n", saveInSlotIndex, slotIndex);
-        frozenLight = light;
+            currentPageIndex = 1;
+
+            this->saveInSlotIndex = slotIndex;
+            Serial.printf("DEBUG: SaveInSlotIndex %d, slotIndex %d\n", saveInSlotIndex, slotIndex);
+            frozenLight = light;
+        }
+        else
+        {
+            mode = 1;
+        }
 
         break;
     };
@@ -133,6 +165,18 @@ void Controller::onScreenRight()
 
     switch (currentPageIndex)
     {
+    case 0:
+    {
+        // exit saving mode
+        if (mode == 1)
+        {
+            // exit saving mode
+            mode = 0;
+        }
+
+        break;
+    }
+
     case 1:
     {
         // CANCEL SAVING
@@ -152,6 +196,11 @@ void Controller::onDown()
     {
     case 0:
     {
+        if (mode == 1)
+            return;
+        if (groups[groupIndex].slotCount == 0)
+            return;
+        slotIndex = (slotIndex + 1) % groups[groupIndex].slotCount;
         break;
     }
     case 1:
@@ -180,6 +229,12 @@ void Controller::onUp()
     {
     case 0:
     {
+        if (mode == 1)
+            return;
+
+        if (groups[groupIndex].slotCount == 0)
+            return;
+        slotIndex = (slotIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
         break;
     }
     case 1:

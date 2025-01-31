@@ -21,11 +21,11 @@ void BaseDisplay::showHomePage(Adafruit_SSD1306 *display)
     display->display();
 }
 
-void BaseDisplay::updateHomePage(Adafruit_SSD1306 *display, int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName)
+void BaseDisplay::updateHomePage(Adafruit_SSD1306 *display, int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName, int mode)
 {
     // update the values in home page
     // call a refresh
-    homePage.update(red, green, blue, slotIndex, slotCount, connectedCount, presetName);
+    homePage.update(red, green, blue, slotIndex, slotCount, connectedCount, presetName, mode);
     showHomePage(display);
 }
 

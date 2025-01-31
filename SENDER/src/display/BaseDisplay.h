@@ -17,7 +17,7 @@ public:
 
     // Home page controls
     void showHomePage(Adafruit_SSD1306 *display);
-    void updateHomePage(Adafruit_SSD1306 *display, int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName);
+    void updateHomePage(Adafruit_SSD1306 *display, int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName, int mode);
     
     void showSaveSlotPage(Adafruit_SSD1306 *display);
     void updateSaveSlotPage(Adafruit_SSD1306 *display, char *groupName, Slot *slots, int slotCount, int currentSlot, bool isInsert);

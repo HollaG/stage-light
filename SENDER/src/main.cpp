@@ -282,8 +282,10 @@ void loop()
     }
 
     if (changed)
-    {
+    {   
         controller.updateLight(red, green, blue);
+        Light displayLight = controller.getLight();
+        
 
         // Serial.print("down = ");
         // Serial.print(down);
@@ -329,7 +331,7 @@ void loop()
         // update the colors
         for (int i = 0; i < NUM_LEDS; i++)
         {
-            leds[i] = CRGB(red, green, blue);
+            leds[i] = CRGB(displayLight.r, displayLight.g, displayLight.b);
         }
 
         FastLED.show();
