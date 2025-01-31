@@ -3,8 +3,8 @@
 
 
 // Constructor Implementation
-CueIndicatorWidget::CueIndicatorWidget(int x, int y, int cueNumber, int lastCueNumber)
-    : BaseWidget(x, y), cueNumber(cueNumber), lastCueNumber(lastCueNumber)
+CueIndicatorWidget::CueIndicatorWidget(int x, int y, int cueIndex, int cueCount)
+    : BaseWidget(x, y), cueIndex(cueIndex), cueCount(cueCount)
 {
 }
 
@@ -16,30 +16,36 @@ void CueIndicatorWidget::draw(Adafruit_SSD1306 *display)
     // only the top left and right corner should be radiused
     display->setCursor(x, y);
     display->setTextSize(3);
-    display->printf("%d", this->cueNumber);
+    display->printf("%d", (this->cueIndex + 1));
     display->setTextSize(1);
-    display->printf("/%d", this->lastCueNumber);
+    display->printf("/%d", this->cueCount);
 
 
 
 };
 
-void CueIndicatorWidget::updateCueNumber(int cueNumber)
+void CueIndicatorWidget::updateCue(int cueIndex, int cueCount)
 {
-    this->cueNumber = cueNumber;
+    this->cueIndex = cueIndex;
+    this->cueCount = cueCount;
 }
 
-void CueIndicatorWidget::updateLastCueNumber(int lastCueNumber)
+void CueIndicatorWidget::updateCueIndex(int cueIndex)
 {
-    this->lastCueNumber = lastCueNumber;
+    this->cueIndex = cueIndex;
+}
+
+void CueIndicatorWidget::updateCueCount(int cueCount)
+{
+    this->cueCount = cueCount;
 }
 
 void CueIndicatorWidget::nextCue()
 {
-    this->cueNumber = (this->cueNumber + 1) % this->lastCueNumber;
+    // this->cueNumber = (this->cueNumber + 1) % this->lastCueNumber;
 }
 
 void CueIndicatorWidget::prevCue()
 {
-    this->cueNumber = (this->cueNumber - 1 + this->lastCueNumber) % this->lastCueNumber;
+    // this->cueNumber = (this->cueNumber - 1 + this->lastCueNumber) % this->lastCueNumber;
 }

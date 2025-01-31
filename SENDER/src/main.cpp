@@ -15,7 +15,6 @@
 #include "display/BaseDisplay.h"
 #include "controller/Controller.h"
 
-
 // RECEIVER(s) MAC ADDRESS
 uint8_t broadcastAddress[] = {0x30, 0xae, 0xa4, 0x6a, 0x30, 0xe0}; // 30:ae:a4:6a:30:e0
 
@@ -24,6 +23,9 @@ uint8_t broadcastAddress[] = {0x30, 0xae, 0xa4, 0x6a, 0x30, 0xe0}; // 30:ae:a4:6
 
 #define BUTTON_DOWN_PIN 14
 #define BUTTON_UP_PIN 13
+#define BUTTON_SEND_PIN 12
+#define BUTTON_SCREEN_LEFT_PIN 4
+#define BUTTON_SCREEN_RIGHT_PIN 2
 
 #define RED_POT 35
 #define GREEN_POT 34
@@ -104,7 +106,6 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
     Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
-
 // MenuScreen* menuScreen;
 BaseDisplay baseDisplay;
 Controller controller(&baseDisplay);
@@ -112,6 +113,9 @@ void setup()
 {
     pinMode(BUTTON_DOWN_PIN, INPUT_PULLDOWN);
     pinMode(BUTTON_UP_PIN, INPUT_PULLDOWN);
+    pinMode(BUTTON_SEND_PIN, INPUT_PULLDOWN);
+    pinMode(BUTTON_SCREEN_LEFT_PIN, INPUT_PULLDOWN);
+    pinMode(BUTTON_SCREEN_RIGHT_PIN, INPUT_PULLDOWN);
     pinMode(RED_POT, INPUT);
     pinMode(GREEN_POT, INPUT);
     pinMode(BLUE_POT, INPUT);
@@ -159,8 +163,6 @@ void setup()
     // add indicator leds
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
-
-
     // debug for menu
     // menuScreen = new MenuScreen(0, 0, &display);
     // menuScreen->draw();
@@ -170,11 +172,15 @@ void setup()
     // baseDisplay.showHomePage(&display);
 
     controller.refreshPage(&display);
-
 }
 
 int prevDownState = LOW;
 int prevUpState = LOW;
+int prevPrevState = LOW;
+int prevNextState = LOW;
+int prevSendState = LOW;
+
+
 int prevR = 0;
 int prevG = 0;
 int prevB = 0;
@@ -185,11 +191,13 @@ int perfIndex = 0;
 
 change_message randomCase;
 
-
 void loop()
 {
     int down = digitalRead(BUTTON_DOWN_PIN);
     int up = digitalRead(BUTTON_UP_PIN);
+    int send = digitalRead(BUTTON_SEND_PIN);
+    int screenLeft = digitalRead(BUTTON_SCREEN_LEFT_PIN);
+    int screenRight = digitalRead(BUTTON_SCREEN_RIGHT_PIN);
 
     int red = map(analogRead(RED_POT), 0, 4095, 0, 255);
     int green = map(analogRead(GREEN_POT), 0, 4095, 0, 255);
@@ -209,6 +217,7 @@ void loop()
             perfIndex = (perfIndex - 1 + numChanges) % numChanges;
 
             // button pressed
+            controller.prevSlot();
         }
     }
 
@@ -223,20 +232,73 @@ void loop()
             perfIndex = (perfIndex + 1) % (sizeof(changes) / sizeof(changes[0]));
 
             // button pressed
+            controller.nextSlot();
         }
     }
 
-    if (red != prevR || green != prevG || blue != prevB)
+    if (send != prevSendState)
+    {
+        prevSendState = send;
+
+        changed = true;
+        if (send == HIGH)
+        {
+            // button pressed
+            controller.onSend();
+        }
+    }
+
+    if (screenLeft != prevPrevState)
+    {
+        prevPrevState = screenLeft;
+
+        changed = true;
+        if (screenLeft == HIGH)
+        {
+            // button pressed
+            controller.onScreenLeft();
+        }
+    }
+
+    if (screenRight != prevNextState)
+    {
+        prevNextState = screenRight;
+
+        changed = true;
+        if (screenRight == HIGH)
+        {
+            // button pressed
+            controller.onScreenRight();
+        }
+    }
+
+
+    // if (abs(red - prevR) >= 5 || red == 0 || red == 255)
+    // {
+    //     prevR = red;
+    //     changed = true;
+    // }
+
+
+
+
+    // TODO: find a better solution for this deboucning
+    if (abs(red - prevR) >= 5 ||
+        abs(green - prevG) >= 5 ||
+        abs(blue - prevB) >= 5 || red == 0 || green == 0 || blue == 0 || red == 255 || green == 255 || blue == 255)
     {
         prevR = red;
         prevG = green;
         prevB = blue;
+
+    
 
         changed = true;
     }
 
     if (changed)
     {
+        controller.updateLight(red, green, blue);
 
         // Serial.print("down = ");
         // Serial.print(down);
@@ -260,7 +322,6 @@ void loop()
 
         // display.display();
 
-        
         // baseDisplay.updateHomePage(&display, red, green, blue, perfIndex, 0, "");
 
         changed = false;
@@ -301,5 +362,6 @@ void loop()
         }
     }
 
-    delay(30);
+    controller.refreshPage(&display);
+    delay(30); // ~30fps
 }

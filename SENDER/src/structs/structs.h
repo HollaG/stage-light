@@ -1,3 +1,6 @@
+#ifndef STRUCTS_H
+#define STRUCTS_H
+
 #include <string>
 
 struct Light {
@@ -17,3 +20,17 @@ struct HomePageData {
     int connectedCount;
     std::string presetName;
 };
+
+struct Slot { 
+    // no need for unique ID?
+    Light light; 
+};
+
+struct Group { 
+    Slot slots[100]; 
+    // bool slotExists[100] = {false};
+    char name[16];
+    int slotCount;
+};
+
+#endif // STRUCTS_H

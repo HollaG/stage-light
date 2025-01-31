@@ -8,23 +8,58 @@ class Controller
 
     BaseDisplay *baseDisplay;
 
+    Light light = {0, 0, 0, 0, 0, 0};
+
     int currentPageIndex = 0; // hardcoded for now
 
-    int red;
-    int green;
-    int blue;
+    // always init to R:0 G:0 B:0
+    int slotIndex = 0;
+    int groupIndex = 0;
+    int groupCount = 0;
+
+    Group groups[20];
+    bool groupExists[20] = {false}; 
+    // we can have up to 20 "loadouts" of 100 slots each
+
 
     // 0 "home"
     // 1 "save_slot"
     // 2 "new_preset"
+
+
+    int connectedCount = 0;
+
+    int saveInSlotIndex = -1;
+    int saveInGroupIndex = -1;
+
+    // frozen values for saving
+    int frozenRed;
+    int frozenGreen;
+    int frozenBlue;
+
 public:
-    Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay) {}
+    Controller(BaseDisplay *baseDisplay);
 
-    void updateLight(int red, int green, int blue)
-    {
-    }
 
-    void refreshPage(Adafruit_SSD1306 *display)
-    {
-    }
+    
+    void updateLight(int red, int green, int blue);
+    Light getLight();
+    
+   
+
+    void nextSlot();
+
+    void prevSlot();
+
+
+
+    void refreshPage(Adafruit_SSD1306 *display);
+
+
+    // BUTTON ACTIONS
+    void onScreenLeft();
+    void onScreenRight();
+    void onSend();
+    void onDown();
+    void onUp();
 };

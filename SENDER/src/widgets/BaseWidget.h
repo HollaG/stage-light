@@ -13,6 +13,9 @@ public:
     // Constructor
     BaseWidget(int x, int y);
 
+    void updatePos(int x, int y);
+    
+
     // Pure virtual function (must be implemented in derived classes)
     virtual void draw(Adafruit_SSD1306 *display) = 0;
 };

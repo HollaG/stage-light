@@ -7,16 +7,18 @@
 class CueIndicatorWidget : public BaseWidget
 {
 public:
-    int cueNumber;
-    int lastCueNumber;
+    int cueIndex;
+    int cueCount;
 
     // Constructor
-    CueIndicatorWidget(int x, int y, int cueNumber, int lastCueNumber);
+    CueIndicatorWidget(int x, int y, int cueIndex, int cueCount);
 
     void draw(Adafruit_SSD1306 *display);
 
-    void updateCueNumber(int cueNumber);
-    void updateLastCueNumber(int lastCueNumber);
+    void updateCueIndex(int cueIndex);
+    void updateCueCount(int cueCount);
+
+    void updateCue(int cueIndex, int cueCount);
 
     void nextCue();
     void prevCue();

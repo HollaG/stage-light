@@ -37,11 +37,11 @@ HomePage::HomePage()
     addWidget(cancelButton);
 
     // cue number
-    cueIndicator = new CueIndicatorWidget(70, MENU_HEIGHT + 5, 14, 25);
+    cueIndicator = new CueIndicatorWidget(70, MENU_HEIGHT + 5, 0, 0);
     addWidget(cueIndicator);
 }
 
-void HomePage::update(int red, int green, int blue, int index, int connectedCount, std::string presetName)
+void HomePage::update(int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName)
 {
     // Update the values in the home page
     // This function will be called from the main loop
@@ -50,38 +50,40 @@ void HomePage::update(int red, int green, int blue, int index, int connectedCoun
     // with the updated values
 
     // only update if each param is not NULL --> NULL indicates no change
-    if (red != curRed) {
-        curRed = red;
-        redPot->updateValue(red);
-    }
+    // if (red != curRed) {
+    // curRed = red;
+    redPot->updateValue(red);
+    // }
 
-    if (green != curGreen)
-    {
-        curGreen = green;
-        greenPot->updateValue(green);
-    }
+    // if (green != curGreen)
+    // {
+    // curGreen = green;
+    greenPot->updateValue(green);
+    // }
 
-    if (blue != curBlue)
-    {
-        curBlue = blue;
-        bluePot->updateValue(blue);
-    }
+    // if (blue != curBlue)
+    // {
+    // curBlue = blue;
+    bluePot->updateValue(blue);
+    // }
 
-    if (index != curIndex)
-    {
-        curIndex = index;
-        menuWidget->updateIndex(curIndex, nextIndex);
-        
-    }
+    // if (slotIndex != curIndex)
+    // {
+    // curIndex = index;
+    menuWidget->updateIndex(curIndex, nextIndex);
 
-    if (connectedCount != this->connectedCount)
-    {
-        this->connectedCount = connectedCount;
-        menuWidget->updateConnectedCount(connectedCount);
-    }
+    // }
 
-    if (presetName != "")
-    {
-        this->presetName = presetName;
-    }
+    // if (connectedCount != this->connectedCount)
+    // {
+    // this->connectedCount = connectedCount;
+    menuWidget->updateConnectedCount(connectedCount);
+    // }
+
+    // if (presetName != "")
+    // {
+    this->presetName = presetName;
+    // }
+
+    cueIndicator->updateCue(slotIndex, slotCount);
 }
