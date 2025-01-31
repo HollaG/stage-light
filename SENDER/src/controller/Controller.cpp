@@ -67,7 +67,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
         Slot *slots = groups[groupIndex].slots;
         int slotCount = groups[groupIndex].slotCount;
 
-        baseDisplay->updateSaveSlotPage(display, groupName, slots, slotCount, slotIndex, false);
+        baseDisplay->updateSaveSlotPage(display, groupName, slots, slotCount, saveInSlotIndex, false);
     }
 
     default:
@@ -92,16 +92,38 @@ void Controller::onScreenLeft()
         // go to Saving page
         currentPageIndex = 1;
 
-        saveInGroupIndex = slotIndex;
+        this->saveInSlotIndex = slotIndex;
+        Serial.printf("DEBUG: SaveInSlotIndex %d, slotIndex %d\n", saveInSlotIndex, slotIndex);
+        frozenLight = light;
 
         break;
     };
-    case 1: 
+    case 1:
     {
-        // save this 
-        // groups[groupIndex].slots[saveInSlotIndex].light = { 
+        // TODO: Handle overflow (more than 100)
+        // save this
+        // groups[groupIndex].slots[saveInSlotIndex].light = {
         //     red
         // }
+        Serial.printf("Saved in group %d, slot %d\n", groupIndex, saveInSlotIndex);
+        Serial.printf("Saved R %d, G %d, B %d\n", frozenLight.r, frozenLight.g, frozenLight.b);
+
+        currentPageIndex = 0;
+
+        if (saveInSlotIndex == -1 || saveInSlotIndex == groups[groupIndex].slotCount)
+        {
+            groups[groupIndex].slots[groups[groupIndex].slotCount].light = frozenLight;
+            groups[groupIndex].slotCount = groups[groupIndex].slotCount + 1;
+            slotIndex = groups[groupIndex].slotCount - 1;
+            Serial.printf("DEBUG: Slot count %d\n", groups[groupIndex].slotCount);
+        }
+        else
+        {
+            // overwrite mode
+            // TODO allow INSERTION inbetween
+            groups[groupIndex].slots[saveInSlotIndex].light = frozenLight;
+            Serial.printf("DEBUG: Slot count %d\n", groups[groupIndex].slotCount);
+        }
     }
     };
 }
@@ -120,14 +142,60 @@ void Controller::onScreenRight()
     }
 }
 
-void Controller::onSend() {
-
+void Controller::onSend()
+{
 }
 
-void Controller::onDown() {
-  
+void Controller::onDown()
+{
+    switch (currentPageIndex)
+    {
+    case 0:
+    {
+        break;
+    }
+    case 1:
+    {
+        // no looping
+        if (saveInSlotIndex == groups[groupIndex].slotCount)
+        {
+        }
+        else
+        {
+
+            saveInSlotIndex++;
+        }
+
+        Serial.printf("Now looking at slot %d\n", saveInSlotIndex);
+
+        break;
+    }
+    }
 }
 
-void Controller::onUp() {
-    // prevSlot();
+void Controller::onUp()
+{
+
+    switch (currentPageIndex)
+    {
+    case 0:
+    {
+        break;
+    }
+    case 1:
+    {
+
+        if (saveInSlotIndex == -1)
+        {
+        }
+        else
+        {
+
+            saveInSlotIndex--;
+        }
+        Serial.printf("Now looking at slot %d\n", saveInSlotIndex);
+
+        break;
+    }
+    }
 }

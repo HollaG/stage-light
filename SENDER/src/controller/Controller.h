@@ -10,6 +10,9 @@ class Controller
 
     Light light = {0, 0, 0, 0, 0, 0};
 
+    // TODO decide if we want to do this
+    Light frozenLight = { 0, 0, 0, 0, 0, 0}; // When in saving screen, we should disable any modifications
+
     int currentPageIndex = 0; // hardcoded for now
 
     // always init to R:0 G:0 B:0
@@ -33,9 +36,7 @@ class Controller
     int saveInGroupIndex = -1;
 
     // frozen values for saving
-    int frozenRed;
-    int frozenGreen;
-    int frozenBlue;
+    
 
 public:
     Controller(BaseDisplay *baseDisplay);

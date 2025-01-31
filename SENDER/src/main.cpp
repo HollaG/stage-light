@@ -21,8 +21,8 @@ uint8_t broadcastAddress[] = {0x30, 0xae, 0xa4, 0x6a, 0x30, 0xe0}; // 30:ae:a4:6
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-#define BUTTON_DOWN_PIN 14
-#define BUTTON_UP_PIN 13
+#define BUTTON_DOWN_PIN 13
+#define BUTTON_UP_PIN 14
 #define BUTTON_SEND_PIN 12
 #define BUTTON_SCREEN_LEFT_PIN 4
 #define BUTTON_SCREEN_RIGHT_PIN 2
@@ -102,8 +102,8 @@ esp_now_peer_info_t peerInfo;
 // callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-    Serial.print("\r\nLast Packet Send Status:\t");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+    // Serial.print("\r\nLast Packet Send Status:\t");
+    // Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
 // MenuScreen* menuScreen;
@@ -137,39 +137,31 @@ void setup()
     // Display static text
 
     // wifi
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
-    // Init ESP-NOW
-    if (esp_now_init() != ESP_OK)
-    {
-        Serial.println("Error initializing ESP-NOW");
-        return;
-    }
+    // WiFi.mode(WIFI_STA);
+    // WiFi.begin(ssid, password);
+    // // Init ESP-NOW
+    // if (esp_now_init() != ESP_OK)
+    // {
+    //     Serial.println("Error initializing ESP-NOW");
+    //     return;
+    // }
 
-    esp_now_register_send_cb(OnDataSent);
+    // esp_now_register_send_cb(OnDataSent);
 
     // Register peer
-    memcpy(peerInfo.peer_addr, broadcastAddress, 6);
-    peerInfo.channel = 0;
-    peerInfo.encrypt = false;
+    // memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+    // peerInfo.channel = 0;
+    // peerInfo.encrypt = false;
 
     // Add peer
-    if (esp_now_add_peer(&peerInfo) != ESP_OK)
-    {
-        Serial.println("Failed to add peer");
-        return;
-    }
+    // if (esp_now_add_peer(&peerInfo) != ESP_OK)
+    // {
+    //     Serial.println("Failed to add peer");
+    //     return;
+    // }
 
     // add indicator leds
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-
-    // debug for menu
-    // menuScreen = new MenuScreen(0, 0, &display);
-    // menuScreen->draw();
-
-    // intiializae the displays
-
-    // baseDisplay.showHomePage(&display);
 
     controller.refreshPage(&display);
 }
@@ -179,7 +171,6 @@ int prevUpState = LOW;
 int prevPrevState = LOW;
 int prevNextState = LOW;
 int prevSendState = LOW;
-
 
 int prevR = 0;
 int prevG = 0;
@@ -203,7 +194,7 @@ void loop()
     int green = map(analogRead(GREEN_POT), 0, 4095, 0, 255);
     int blue = map(analogRead(BLUE_POT), 0, 4095, 0, 255);
 
-    Serial.printf("Red: %d, Green: %d, Blue: %d\n", red, green, blue);
+    // Serial.printf("Red: %d, Green: %d, Blue: %d\n", red, green, blue);
 
     if (down != prevDownState)
     {
@@ -213,11 +204,11 @@ void loop()
 
         if (down == HIGH)
         {
-            int numChanges = (int)(sizeof(changes) / sizeof(changes[0]));
-            perfIndex = (perfIndex - 1 + numChanges) % numChanges;
+            // int numChanges = (int)(sizeof(changes) / sizeof(changes[0]));
+            // perfIndex = (perfIndex - 1 + numChanges) % numChanges;
 
             // button pressed
-            controller.prevSlot();
+            controller.onDown();
         }
     }
 
@@ -228,11 +219,11 @@ void loop()
         changed = true;
         if (up == HIGH)
         {
-            int numChanges = sizeof(changes) / sizeof(changes[0]);
-            perfIndex = (perfIndex + 1) % (sizeof(changes) / sizeof(changes[0]));
+            // int numChanges = sizeof(changes) / sizeof(changes[0]);
+            // perfIndex = (perfIndex + 1) % (sizeof(changes) / sizeof(changes[0]));
 
             // button pressed
-            controller.nextSlot();
+            controller.onUp();
         }
     }
 
@@ -272,15 +263,11 @@ void loop()
         }
     }
 
-
     // if (abs(red - prevR) >= 5 || red == 0 || red == 255)
     // {
     //     prevR = red;
     //     changed = true;
     // }
-
-
-
 
     // TODO: find a better solution for this deboucning
     if (abs(red - prevR) >= 5 ||
@@ -290,8 +277,6 @@ void loop()
         prevR = red;
         prevG = green;
         prevB = blue;
-
-    
 
         changed = true;
     }
@@ -350,16 +335,16 @@ void loop()
         FastLED.show();
 
         // Send message via ESP-NOW
-        esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&randomCase, sizeof(randomCase));
+        // esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&randomCase, sizeof(randomCase));
 
-        if (result == ESP_OK)
-        {
-            Serial.println("Sent with success");
-        }
-        else
-        {
-            Serial.println("Error sending the data");
-        }
+        // if (result == ESP_OK)
+        // {
+        //     Serial.println("Sent with success");
+        // }
+        // else
+        // {
+        //     Serial.println("Error sending the data");
+        // }
     }
 
     controller.refreshPage(&display);
