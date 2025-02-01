@@ -136,7 +136,6 @@ void setup()
     }
     ESP_ERROR_CHECK(err);
 
-
     pinMode(BUTTON_DOWN_PIN, INPUT_PULLDOWN);
     pinMode(BUTTON_UP_PIN, INPUT_PULLDOWN);
     pinMode(BUTTON_SEND_PIN, INPUT_PULLDOWN);
@@ -154,7 +153,6 @@ void setup()
         for (;;)
             ;
     }
-    delay(2000);
 
     display.clearDisplay();
 
@@ -190,9 +188,8 @@ void setup()
     // add indicator leds
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
-    controller.refreshPage(&display);
-
     controller.load();
+    // controller.refreshPage(&display);
 }
 
 int prevDownState = LOW;
@@ -213,6 +210,10 @@ change_message randomCase;
 
 void loop()
 {
+
+    controller.refreshPage(&display);
+    delay(30); // ~30fps
+
     int down = digitalRead(BUTTON_DOWN_PIN);
     int up = digitalRead(BUTTON_UP_PIN);
     int send = digitalRead(BUTTON_SEND_PIN);
@@ -379,7 +380,4 @@ void loop()
         //     Serial.println("Error sending the data");
         // }
     }
-
-    controller.refreshPage(&display);
-    delay(30); // ~30fps
 }

@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include "bitmaps/loading.h"
 
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
@@ -62,6 +63,30 @@ void Controller::prevSlot()
 
 void Controller::refreshPage(Adafruit_SSD1306 *display)
 {
+    // TODO: should we integrate the loader as a page?
+    // this is a bit not-OOP as the responsibility to draw shouldn't be in the controller,
+    // it should be in the page
+    // perhaps we should use a "loading" page instead
+
+    if (saveTaskHandle != NULL)
+    {
+        eTaskState state = eTaskGetState(saveTaskHandle);
+
+        if (state == eDeleted)
+        {
+            Serial.println("\n[INFO] Background worker complete.");
+            saveTaskHandle = NULL; // Reset handle
+        }
+
+        display->clearDisplay();
+        display->drawBitmap(2, 16, frames[loadingIndex], FRAME_WIDTH, FRAME_HEIGHT, 1);
+        display->setCursor(40, 28);
+        display->print(loadingLabel);
+        display->display();
+        loadingIndex = (loadingIndex + 1) % FRAME_COUNT;
+        return;
+    }
+
     // depending on the current page index, refresh the page by calling the relevant functions
     switch (currentPageIndex)
     {
@@ -284,6 +309,30 @@ void Controller::onUp()
 
 void Controller::save()
 {
+    isLoading = true;
+    char loading[16] = "Saving slot...";
+    strcpy(loadingLabel, loading);
+
+    xTaskCreate(
+        saveHelper,
+        "backgroundSave",
+        16384,
+        this,
+        1,
+        &saveTaskHandle);
+    // backgroundSave();
+    isLoading = false;
+}
+
+void Controller::saveHelper(void *parameter)
+{
+    Controller *instance = static_cast<Controller *>(parameter);
+    instance->backgroundSave();
+    vTaskDelete(NULL);
+}
+
+void Controller::backgroundSave()
+{
     Serial.println("[debug] Saving data...");
 
     // 1️⃣ Save settings to Preferences (NVS)
@@ -321,6 +370,29 @@ void Controller::save()
 }
 
 void Controller::load()
+{
+    isLoading = true;
+    char loading[16] = "Initializing...";
+    strcpy(loadingLabel, loading);
+    xTaskCreate(
+        loadHelper,
+        "backgroundLoad",
+        16384,
+        this,
+        1,
+        &saveTaskHandle);
+
+    isLoading = false;
+}
+
+void Controller::loadHelper(void *parameter)
+{
+    Controller *instance = static_cast<Controller *>(parameter);
+    instance->backgroundLoad();
+    vTaskDelete(NULL);
+}
+
+void Controller::backgroundLoad()
 {
     Serial.println("[init] Loading saved data...");
 

@@ -39,8 +39,12 @@ class Controller
     int saveInSlotIndex = -1;
     int saveInGroupIndex = -1;
 
-    // frozen values for saving
+    // Loading mode
+    bool isLoading = false;
+    char loadingLabel[16];
+    int loadingIndex = 0;
 
+    TaskHandle_t saveTaskHandle = NULL;
 public:
     Controller(BaseDisplay *baseDisplay);
 
@@ -63,4 +67,12 @@ public:
 
     void save();
     void load();
+
+
+private: 
+    void backgroundSave();
+    void backgroundLoad();
+
+    static void saveHelper(void *parameter);
+    static void loadHelper(void *parameter);
 };
