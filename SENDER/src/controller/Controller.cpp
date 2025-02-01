@@ -2,8 +2,22 @@
 
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
+
     // create initial group if not exists
     // TODO: implement saving
+
+    // // Initialize LittleFS
+    // if (REFORMAT)
+    // {
+    //     LittleFS.format();
+    // } // first time setup
+
+    // if (!LittleFS.begin(true))
+    // { // `true` forces formatting if needed
+    //     Serial.println("[error] LittleFS Mount Failed!");
+    //     return;
+    // }
+    // Serial.println("[debug] LittleFS Mounted.");
 
     Group group;
     char name[16] = "Default";
@@ -20,6 +34,8 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     slotIndex = 0; // NOTE THAT THIS IS 0-INDEXED
     groupIndex = 0;
     groupCount = 1; // this is a COUNT
+
+    // load();
 }
 
 void Controller::updateLight(int red, int green, int blue)
@@ -119,7 +135,16 @@ void Controller::onScreenLeft()
 
             currentPageIndex = 1;
 
-            this->saveInSlotIndex = slotIndex;
+            // SPECIAL: if slotIndex is the last item, then we want to save in the next slot
+            if (slotIndex == groups[groupIndex].slotCount - 1)
+            {
+                saveInSlotIndex = slotIndex + 1;
+            }
+            else
+            {
+                saveInSlotIndex = slotIndex;
+            }
+
             Serial.printf("DEBUG: SaveInSlotIndex %d, slotIndex %d\n", saveInSlotIndex, slotIndex);
             frozenLight = light;
         }
@@ -156,6 +181,8 @@ void Controller::onScreenLeft()
             groups[groupIndex].slots[saveInSlotIndex].light = frozenLight;
             Serial.printf("DEBUG: Slot count %d\n", groups[groupIndex].slotCount);
         }
+
+        save();
     }
     };
 }
@@ -253,4 +280,89 @@ void Controller::onUp()
         break;
     }
     }
+}
+
+void Controller::save()
+{
+    Serial.println("[debug] Saving data...");
+
+    // 1️⃣ Save settings to Preferences (NVS)
+    prefs.begin("settings");
+    prefs.putBool("loadFromSave", true);
+    prefs.end();
+
+    // 2️⃣ Save group metadata to Preferences
+    prefs.begin("current", false);
+    prefs.putInt("slotIndex", slotIndex);
+    prefs.putInt("groupIndex", groupIndex);
+    prefs.putInt("groupCount", groupCount);
+    prefs.end();
+
+    // 3️⃣ Save `groups` and `groupExists` to LittleFS
+    File file = LittleFS.open("/groups.bin", "w");
+    if (!file)
+    {
+        Serial.println("[error] Failed to open /groups.bin for writing.");
+        return;
+    }
+    file.write((uint8_t *)groups, sizeof(groups));
+    file.close();
+    Serial.println("[debug] Groups saved to LittleFS.");
+
+    file = LittleFS.open("/groupExists.bin", "w");
+    if (!file)
+    {
+        Serial.println("[error] Failed to open /groupExists.bin for writing.");
+        return;
+    }
+    file.write((uint8_t *)groupExists, sizeof(groupExists));
+    file.close();
+    Serial.println("[debug] GroupExists saved to LittleFS.");
+}
+
+void Controller::load()
+{
+    Serial.println("[init] Loading saved data...");
+
+    // 1️⃣ Check if settings exist in Preferences
+    prefs.begin("settings");
+    bool exists = prefs.isKey("loadFromSave");
+    prefs.end();
+
+    if (!exists)
+    {
+        Serial.println("[init] No previous data found");
+        return;
+    }
+
+    Serial.println("[init] Previous data found");
+
+    // 2️⃣ Load group metadata from Preferences
+    prefs.begin("current", true);
+    slotIndex = prefs.getInt("slotIndex", 0);
+    groupIndex = prefs.getInt("groupIndex", 0);
+    groupCount = prefs.getInt("groupCount", 0);
+    prefs.end();
+
+    // 3️⃣ Load `groups` from LittleFS
+    File file = LittleFS.open("/groups.bin", "r");
+    if (!file)
+    {
+        Serial.println("[error] Failed to open /groups.bin for reading.");
+        return;
+    }
+    file.readBytes((char *)groups, sizeof(groups));
+    file.close();
+    Serial.println("[debug] Groups loaded from LittleFS.");
+
+    // 4️⃣ Load `groupExists` from LittleFS
+    file = LittleFS.open("/groupExists.bin", "r");
+    if (!file)
+    {
+        Serial.println("[error] Failed to open /groupExists.bin for reading.");
+        return;
+    }
+    file.readBytes((char *)groupExists, sizeof(groupExists));
+    file.close();
+    Serial.println("[debug] GroupExists loaded from LittleFS.");
 }

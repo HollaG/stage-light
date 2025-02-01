@@ -15,6 +15,14 @@
 #include "display/BaseDisplay.h"
 #include "controller/Controller.h"
 
+#define REFORMAT true
+#define FORMAT_LITTLEFS_IF_FAILED true
+
+#include "LittleFS.h"
+#include "esp_system.h"
+#include "nvs_flash.h"
+#include "nvs.h"
+
 // RECEIVER(s) MAC ADDRESS
 uint8_t broadcastAddress[] = {0x30, 0xae, 0xa4, 0x6a, 0x30, 0xe0}; // 30:ae:a4:6a:30:e0
 
@@ -111,6 +119,24 @@ BaseDisplay baseDisplay;
 Controller controller(&baseDisplay);
 void setup()
 {
+    if (!LittleFS.begin(true))
+    {
+        Serial.println("An Error has occurred while mounting LittleFS");
+        return;
+    }
+
+    // NVS
+    esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        // NVS partition was truncated and needs to be erased
+        // Retry nvs_flash_init
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        err = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(err);
+
+
     pinMode(BUTTON_DOWN_PIN, INPUT_PULLDOWN);
     pinMode(BUTTON_UP_PIN, INPUT_PULLDOWN);
     pinMode(BUTTON_SEND_PIN, INPUT_PULLDOWN);
@@ -129,6 +155,7 @@ void setup()
             ;
     }
     delay(2000);
+
     display.clearDisplay();
 
     display.setTextSize(1);
@@ -164,6 +191,8 @@ void setup()
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
     controller.refreshPage(&display);
+
+    controller.load();
 }
 
 int prevDownState = LOW;
@@ -235,7 +264,10 @@ void loop()
         if (send == HIGH)
         {
             // button pressed
-            controller.onSend();
+            // controller.onSend();
+
+            // TEMP: reboot ESP
+            esp_restart();
         }
     }
 
@@ -282,10 +314,9 @@ void loop()
     }
 
     if (changed)
-    {   
+    {
         controller.updateLight(red, green, blue);
         Light displayLight = controller.getLight();
-        
 
         // Serial.print("down = ");
         // Serial.print(down);
