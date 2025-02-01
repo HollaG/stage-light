@@ -38,6 +38,7 @@ class Controller
 
     int saveInSlotIndex = -1;
     int saveInGroupIndex = -1;
+    bool isInsert = false;
 
     // Loading mode
     bool isLoading = false;

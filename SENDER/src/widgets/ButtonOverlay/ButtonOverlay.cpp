@@ -27,7 +27,7 @@ void ButtonOverlayWidget::draw(Adafruit_SSD1306 *display)
 
     display->getTextBounds(buttonLabel.c_str(), 0, 0, &x1, &y1, &w, &h);
 
-    display->setCursor(centerX - w / 2, y + 2);
+    display->setCursor(centerX - w / 2, y + 3);
     display->print(buttonLabel.c_str());
 };
 

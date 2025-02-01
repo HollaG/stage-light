@@ -15,7 +15,6 @@ SaveSlotPage::SaveSlotPage()
     addWidget(currentItem);
     addWidget(nextItem);
 
-
     // 1) Save Menu Header
     saveMenuHeader = new SaveMenuHeaderWidget("");
     addWidget(saveMenuHeader);
@@ -34,7 +33,7 @@ SaveSlotPage::SaveSlotPage()
     //     addWidget(saveMenuItems[i]);
     // }
 }
-void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveInSlotIndex, bool isInsert)
+void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveInSlotIndex, bool isInsBef)
 {
     // Update header and slots
     saveMenuHeader->updateName(groupName);
@@ -42,21 +41,25 @@ void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveI
     this->slotCount = slotCount;
 
     // Lambda function to format light labels
-    auto formatLightLabel = [](const Slot &slot) -> std::string
+    auto formatLightLabel = [](const Slot &slot, int index) -> std::string
     {
         std::stringstream ss;
-        ss << "R:" << slot.light.r << " G:" << slot.light.g << " B:" << slot.light.b;
+        if (index + 1 < 10)
+        {
+            ss << " ";
+        }
+        ss << index + 1;
+        ss << " " << "R:" << slot.light.r << " G:" << slot.light.g << " B:" << slot.light.b;
         return ss.str();
     };
 
-    Serial.printf("slotCount %d\n", slotCount);
     // Case: No slots available
     if (slotCount == 0)
     {
         nextItem->setHidden();
         prevItem->setHidden();
         currentItem->setIsDisplayed();
-        currentItem->updateLabel("Unsaved slot");
+        currentItem->updateLabel("   Unsaved slot");
         nextItem->updateLabel("");
         prevItem->updateLabel("");
         actionButton->updateLabel("Save");
@@ -69,10 +72,17 @@ void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveI
         nextItem->setHidden();
         prevItem->setIsDisplayed();
         currentItem->setIsDisplayed();
-        prevItem->updateLabel(formatLightLabel(slots[saveInSlotIndex - 1]));
-        currentItem->updateLabel("Unsaved slot");
+        prevItem->updateLabel(formatLightLabel(slots[saveInSlotIndex - 1], saveInSlotIndex - 1));
+        currentItem->updateLabel("   Unsaved slot");
         nextItem->updateLabel("");
-        actionButton->updateLabel("Save");
+        if (isInsBef)
+        {
+            actionButton->updateLabel("InsBef");
+        }
+        else
+        {
+            actionButton->updateLabel("Save");
+        }
         return;
     }
 
@@ -82,10 +92,17 @@ void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveI
         prevItem->setHidden();
         nextItem->setIsDisplayed();
         currentItem->setIsDisplayed();
-        nextItem->updateLabel(formatLightLabel(slots[saveInSlotIndex + 1]));
-        currentItem->updateLabel("Unsaved slot");
+        nextItem->updateLabel(formatLightLabel(slots[saveInSlotIndex + 1], saveInSlotIndex + 1));
+        currentItem->updateLabel("   Unsaved slot");
         prevItem->updateLabel("");
-        actionButton->updateLabel("Save");
+        if (isInsBef)
+        {
+            actionButton->updateLabel("InsBef");
+        }
+        else
+        {
+            actionButton->updateLabel("Save");
+        }
 
         return;
     }
@@ -96,10 +113,17 @@ void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveI
         prevItem->setIsDisplayed();
         nextItem->setIsDisplayed();
         currentItem->setIsDisplayed();
-        prevItem->updateLabel("Unsaved slot");
-        nextItem->updateLabel("Unsaved slot");
-        currentItem->updateLabel(formatLightLabel(slots[saveInSlotIndex]));
-        actionButton->updateLabel("OvWrite");
+        prevItem->updateLabel("   Unsaved slot");
+        nextItem->updateLabel("   Unsaved slot");
+        currentItem->updateLabel(formatLightLabel(slots[saveInSlotIndex], saveInSlotIndex));
+        if (isInsBef)
+        {
+            actionButton->updateLabel("InsBef");
+        }
+        else
+        {
+            actionButton->updateLabel("OvWrite");
+        }
 
         return;
     }
@@ -110,10 +134,17 @@ void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveI
         prevItem->setIsDisplayed();
         nextItem->setIsDisplayed();
         currentItem->setIsDisplayed();
-        prevItem->updateLabel("Unsaved slot");
-        currentItem->updateLabel(formatLightLabel(slots[saveInSlotIndex]));
-        nextItem->updateLabel(formatLightLabel(slots[saveInSlotIndex + 1]));
-        actionButton->updateLabel("OvWrite");
+        prevItem->updateLabel("   Unsaved slot");
+        currentItem->updateLabel(formatLightLabel(slots[saveInSlotIndex], saveInSlotIndex));
+        nextItem->updateLabel(formatLightLabel(slots[saveInSlotIndex + 1], saveInSlotIndex + 1));
+        if (isInsBef)
+        {
+            actionButton->updateLabel("InsBef");
+        }
+        else
+        {
+            actionButton->updateLabel("OvWrite");
+        }
 
         return;
     }
@@ -124,10 +155,17 @@ void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveI
         prevItem->setIsDisplayed();
         nextItem->setIsDisplayed();
         currentItem->setIsDisplayed();
-        prevItem->updateLabel(formatLightLabel(slots[saveInSlotIndex - 1]));
-        currentItem->updateLabel(formatLightLabel(slots[saveInSlotIndex]));
-        nextItem->updateLabel("Unsaved slot");
-        actionButton->updateLabel("OvWrite");
+        prevItem->updateLabel(formatLightLabel(slots[saveInSlotIndex - 1], saveInSlotIndex - 1));
+        currentItem->updateLabel(formatLightLabel(slots[saveInSlotIndex], saveInSlotIndex));
+        nextItem->updateLabel("   Unsaved slot");
+        if (isInsBef)
+        {
+            actionButton->updateLabel("InsBef");
+        }
+        else
+        {
+            actionButton->updateLabel("OvWrite");
+        }
 
         return;
     }
@@ -136,8 +174,15 @@ void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveI
     prevItem->setIsDisplayed();
     nextItem->setIsDisplayed();
     currentItem->setIsDisplayed();
-    prevItem->updateLabel(formatLightLabel(slots[saveInSlotIndex - 1]));
-    currentItem->updateLabel(formatLightLabel(slots[saveInSlotIndex]));
-    nextItem->updateLabel(formatLightLabel(slots[saveInSlotIndex + 1]));
-    actionButton->updateLabel("OvWrite");
+    prevItem->updateLabel(formatLightLabel(slots[saveInSlotIndex - 1], saveInSlotIndex - 1));
+    currentItem->updateLabel(formatLightLabel(slots[saveInSlotIndex], saveInSlotIndex));
+    nextItem->updateLabel(formatLightLabel(slots[saveInSlotIndex + 1], saveInSlotIndex + 1));
+    if (isInsBef)
+    {
+        actionButton->updateLabel("InsBef");
+    }
+    else
+    {
+        actionButton->updateLabel("OvWrite");
+    }
 }

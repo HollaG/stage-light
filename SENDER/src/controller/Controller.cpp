@@ -123,7 +123,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
         Slot *slots = groups[groupIndex].slots;
         int slotCount = groups[groupIndex].slotCount;
 
-        baseDisplay->updateSaveSlotPage(display, groupName, slots, slotCount, saveInSlotIndex, false);
+        baseDisplay->updateSaveSlotPage(display, groupName, slots, slotCount, saveInSlotIndex, isInsert);
     }
 
     default:
@@ -192,19 +192,39 @@ void Controller::onScreenLeft()
 
         currentPageIndex = 0;
 
-        if (saveInSlotIndex == -1 || saveInSlotIndex == groups[groupIndex].slotCount)
+        // case 1: isInsert = false, saveInSlotIndex = -1
+        // => insert at the head of the list
+        // case 2: isInsert = false, saveInSlotIndex = slotCount
+        // => insert at the end of the list
+        // case 3: isInsert = true, saveInSlotIndex = any except those 2
+        // => insert inbetween
+        if (isInsert == false && saveInSlotIndex == -1) { 
+            // insert at the head of the list
+            for (int i = groups[groupIndex].slotCount; i > 0; i--)
+            {
+                groups[groupIndex].slots[i] = groups[groupIndex].slots[i - 1];
+            }
+            groups[groupIndex].slots[0].light = frozenLight;
+            groups[groupIndex].slotCount = groups[groupIndex].slotCount + 1;
+            slotIndex = 0; // show the newly inserted slot
+        }
+        else if (isInsert == false && saveInSlotIndex == groups[groupIndex].slotCount)
         {
+            // insert at the end of the list
             groups[groupIndex].slots[groups[groupIndex].slotCount].light = frozenLight;
             groups[groupIndex].slotCount = groups[groupIndex].slotCount + 1;
-            slotIndex = groups[groupIndex].slotCount - 1;
-            Serial.printf("DEBUG: Slot count %d\n", groups[groupIndex].slotCount);
+            slotIndex = groups[groupIndex].slotCount - 1; // show the newly inserted slot
         }
         else
         {
-            // overwrite mode
-            // TODO allow INSERTION inbetween
+            // insert inbetween
+            for (int i = groups[groupIndex].slotCount; i > saveInSlotIndex; i--)
+            {
+                groups[groupIndex].slots[i] = groups[groupIndex].slots[i - 1];
+            }
             groups[groupIndex].slots[saveInSlotIndex].light = frozenLight;
-            Serial.printf("DEBUG: Slot count %d\n", groups[groupIndex].slotCount);
+            groups[groupIndex].slotCount = groups[groupIndex].slotCount + 1;
+            slotIndex = saveInSlotIndex; // show the newly inserted slot
         }
 
         save();
@@ -263,8 +283,25 @@ void Controller::onDown()
         }
         else
         {
-
-            saveInSlotIndex++;
+            if (saveInSlotIndex == -1 || saveInSlotIndex == 0)
+            {
+                saveInSlotIndex++;
+                isInsert = false;
+            }
+            else if (saveInSlotIndex == groups[groupIndex].slotCount - 1)
+            {
+                saveInSlotIndex++;
+                isInsert = false;
+            }
+            else if (!isInsert)
+            {
+                isInsert = true;
+                saveInSlotIndex++;
+            }
+            else
+            {
+                isInsert = false;
+            }
         }
 
         Serial.printf("Now looking at slot %d\n", saveInSlotIndex);
@@ -297,8 +334,21 @@ void Controller::onUp()
         }
         else
         {
+            if (saveInSlotIndex == groups[groupIndex].slotCount || saveInSlotIndex == 0)
+            {
+                saveInSlotIndex--;
+                isInsert = false;
+            }
+            else if (!isInsert)
+            {
+                isInsert = true;
+            }
+            else
+            {
+                isInsert = false;
 
-            saveInSlotIndex--;
+                saveInSlotIndex--;
+            }
         }
         Serial.printf("Now looking at slot %d\n", saveInSlotIndex);
 

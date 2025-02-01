@@ -19,12 +19,12 @@ void SaveMenuItemWidget::draw(Adafruit_SSD1306 *display)
     {
         display->fillRect(x, y, 128, 10, SSD1306_WHITE);
         display->setTextColor(SSD1306_BLACK);
-        display->printf("  %s", this->label.c_str());
+        display->printf("%s", this->label.c_str());
     }
     else
     {
         display->setTextColor(SSD1306_WHITE);
-        display->printf("  %s", this->label.c_str());
+        display->printf("%s", this->label.c_str());
     }
 }
 

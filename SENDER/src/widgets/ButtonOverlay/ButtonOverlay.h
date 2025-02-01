@@ -4,7 +4,7 @@
 #include <Adafruit_SSD1306.h>
 #include "widgets/BaseWidget.h"
 
-#define BUTTON_WIDTH 48
+#define BUTTON_WIDTH 52
 #define BUTTON_HEIGHT 12
 #define BUTTON_RADIUS 3
 

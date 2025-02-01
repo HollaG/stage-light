@@ -92,11 +92,12 @@ void HomePage::update(int red, int green, int blue, int slotIndex, int slotCount
     if (mode == 1)
     {
         actionButton->updateLabel("Save");
-        cancelButton->showButton();
+        cancelButton->updateLabel("Cancel");
+    
     }
     else
     {
         actionButton->updateLabel("Edit");
-        cancelButton->hideButton();
+        cancelButton->updateLabel("Settings");
     }
 }
