@@ -29,14 +29,15 @@ struct Slot {
 struct Group { 
     Slot slots[100]; 
     // bool slotExists[100] = {false};
-    char name[16];
+    char name[16]; 
     int slotCount;
 };
 
 enum Page { 
     HOME_PAGE,
     SAVE_SLOT_PAGE,
-    SETTINGS_PAGE
+    SETTINGS_PAGE,
+    DELETE_SLOT_PAGE
 };
 
 #endif // STRUCTS_H

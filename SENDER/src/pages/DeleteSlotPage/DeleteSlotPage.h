@@ -7,11 +7,11 @@
 #include "widgets/Save/SaveMenuItem/SaveMenuItem.h"
 
 
-class SaveSlotPage : public BasePage
+class DeleteSlotPage : public BasePage
 {
 public:
     // Constructor
-    SaveSlotPage();
+    DeleteSlotPage();
 
     // variables
     char *groupName;
@@ -37,7 +37,7 @@ public:
 
 
     // update 
-    void update(char *groupName, Slot *slots, int slotCount, int currentSlot, bool isInsert);
+    void update(char *groupName, Slot* slots, int index, int slotCount);
     
 };
 

@@ -6,20 +6,21 @@
 #include "structs/structs.h"
 #include "widgets/Save/SaveMenuItem/SaveMenuItem.h"
 
+#define SETTINGS_COUNT 3
 
-class SaveSlotPage : public BasePage
+class SettingsPage : public BasePage
 {
 public:
     // Constructor
-    SaveSlotPage();
+    SettingsPage();
 
     // variables
     char *groupName;
-    Slot *slots = NULL;
-    int slotCount;
-    int saveInSlotIndex;
 
-
+    // create array of char[16] for each menu option
+    std::string options[SETTINGS_COUNT] = {"  Delete item", "  Change group", "  Scan for receivers"};
+    // 1) Delete item
+    // 2) Change group
 
     // Widgets
 
@@ -32,13 +33,7 @@ public:
     SaveMenuItemWidget *nextItem;
     SaveMenuItemWidget *currentItem;
 
+    // update
+    void update(char *groupName, int index);
 
-
-
-
-    // update 
-    void update(char *groupName, Slot *slots, int slotCount, int currentSlot, bool isInsert);
-    
 };
-
-

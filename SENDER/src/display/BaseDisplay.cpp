@@ -5,6 +5,7 @@ BaseDisplay::BaseDisplay()
 {
     homePage = HomePage();
     saveSlotPage = SaveSlotPage();
+    settingsPage = SettingsPage();
 }
 
 // Show Home Page
@@ -49,6 +50,40 @@ void BaseDisplay::updateSaveSlotPage(Adafruit_SSD1306 *display, char *groupName,
     // call a refresh
     saveSlotPage.update(groupName, slots, slotCount, currentSlot, isInsert);
     showSaveSlotPage(display);
+}
+
+void BaseDisplay::showSettingsPage(Adafruit_SSD1306 *display)
+{
+    display->clearDisplay();
+    display->setCursor(0, 0);
+    settingsPage.draw(display);
+
+    // display the updated screen
+    display->display();
+}
+
+void BaseDisplay::updateSettingsPage(Adafruit_SSD1306 *display, char *groupName, int index)
+{
+    // Update the settings page
+    settingsPage.update(groupName, index);
+    showSettingsPage(display);
+}
+
+void BaseDisplay::showDeleteSlotPage(Adafruit_SSD1306 *display)
+{
+    display->clearDisplay();
+    display->setCursor(0, 0);
+    deleteSlotPage.draw(display);
+
+    // display the updated screen
+    display->display();
+}
+
+void BaseDisplay::updateDeleteSlotPage(Adafruit_SSD1306 *display, char *groupName, Slot *slots, int index, int slotCount)
+{
+    // Update the settings page
+    deleteSlotPage.update(groupName, slots, index, slotCount);
+    showDeleteSlotPage(display);
 }
 
 

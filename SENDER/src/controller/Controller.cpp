@@ -85,7 +85,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
         display->clearDisplay();
         display->drawBitmap(2, 16, frames[loadingIndex], FRAME_WIDTH, FRAME_HEIGHT, 1);
         display->setCursor(40, 28);
-        display->print(loadingLabel);
+        display->print(loadingLabel.c_str());
         display->display();
         loadingIndex = (loadingIndex + 1) % FRAME_COUNT;
         return;
@@ -128,8 +128,24 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
         int slotCount = groups[groupIndex].slotCount;
 
         baseDisplay->updateSaveSlotPage(display, groupName, slots, slotCount, saveInSlotIndex, isInsert);
+        break;
     }
+    case SETTINGS_PAGE:
+    {
+        char groupName[16];
+        strcpy(groupName, groups[groupIndex].name);
 
+        baseDisplay->updateSettingsPage(display, groupName, settingsIndex);
+        break;
+    }
+    case DELETE_SLOT_PAGE:
+    {
+        char groupName[16];
+        strcpy(groupName, groups[groupIndex].name);
+
+        baseDisplay->updateDeleteSlotPage(display, groupName, groups[groupIndex].slots, deleteIndex, groups[groupIndex].slotCount);
+        break;
+    }
     default:
     {
     }
@@ -148,11 +164,12 @@ Light Controller::getLight()
     }
 }
 
+// TODO: disable all buttons when saving
 void Controller::onScreenLeft()
 {
     // 0 --> SAVE
 
-    Serial.println("DEBUG: Screen Left Button Pressed");
+    Serial.println("[debug] Screen Left Button Pressed");
 
     switch (currentPage)
     {
@@ -232,13 +249,64 @@ void Controller::onScreenLeft()
             slotIndex = saveInSlotIndex; // show the newly inserted slot
         }
 
-        save();
+        save("Saving slot...");
+        break;
     }
+
+    case SETTINGS_PAGE:
+    {
+        // // go to HOME
+        // changePage(HOME_PAGE);
+        // break;
+        if (settingsIndex == 0)
+        {
+            // delete item
+            deleteIndex = slotIndex;
+            changePage(DELETE_SLOT_PAGE);
+        }
+        if (settingsIndex == 1)
+        {
+            // change group
+        }
+        if (settingsIndex == 2)
+        {
+            // Scan for receivers
+            // unimplemented
+        }
+
+        break;
     };
+    case DELETE_SLOT_PAGE:
+    {
+        // delete the slot
+        for (int i = deleteIndex; i < groups[groupIndex].slotCount - 1; i++)
+        {
+            groups[groupIndex].slots[i] = groups[groupIndex].slots[i + 1];
+        }
+        groups[groupIndex].slotCount = groups[groupIndex].slotCount - 1;
+
+        // changePage(HOME_PAGE);
+        if (groups[groupIndex].slotCount == 0)
+        {
+            changePage(HOME_PAGE);
+        }
+        if (deleteIndex == groups[groupIndex].slotCount)
+        {
+            deleteIndex--;
+        }
+        if (slotIndex == groups[groupIndex].slotCount)
+        {
+            slotIndex--;
+        }
+        save("Deleting slot...");
+        break;
+    }
+    }
 }
 
 void Controller::onScreenRight()
 {
+    Serial.println("[debug] Screen Right Button Pressed");
 
     switch (currentPage)
     {
@@ -250,6 +318,10 @@ void Controller::onScreenRight()
             // exit saving mode
             mode = 0;
         }
+        else
+        {
+            changePage(SETTINGS_PAGE);
+        }
 
         break;
     }
@@ -258,6 +330,17 @@ void Controller::onScreenRight()
     {
         // CANCEL SAVING
         changePage(HOME_PAGE);
+        break;
+    }
+
+    case SETTINGS_PAGE:
+    {
+        changePage(HOME_PAGE);
+        break;
+    }
+    case DELETE_SLOT_PAGE:
+    {
+        changePage(SETTINGS_PAGE);
         break;
     }
     }
@@ -313,6 +396,17 @@ void Controller::onDown()
 
         break;
     }
+    case SETTINGS_PAGE:
+    {
+        // go to HOME
+        settingsIndex = (settingsIndex + 1) % SETTINGS_COUNT;
+        break;
+    };
+    case DELETE_SLOT_PAGE:
+    {
+        deleteIndex = (deleteIndex + 1) % groups[groupIndex].slotCount;
+        break;
+    }
     }
 }
 
@@ -359,14 +453,25 @@ void Controller::onUp()
 
         break;
     }
+    case SETTINGS_PAGE:
+    {
+
+        settingsIndex = (settingsIndex - 1 + SETTINGS_COUNT) % SETTINGS_COUNT;
+        break;
     }
+    case DELETE_SLOT_PAGE:
+    {
+        deleteIndex = (deleteIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
+        break;
+    }
+    };
 }
 
-void Controller::save()
+void Controller::save(std::string message = "Saving slot...")
 {
     isLoading = true;
-    char loading[16] = "Saving slot...";
-    strcpy(loadingLabel, loading);
+    
+    loadingLabel = message;
 
     xTaskCreate(
         saveHelper,
@@ -426,9 +531,8 @@ void Controller::backgroundSave()
 
 void Controller::load()
 {
-    isLoading = true;
-    char loading[16] = "Initializing...";
-    strcpy(loadingLabel, loading);
+
+    loadingLabel = "Initializing...";
     xTaskCreate(
         loadHelper,
         "backgroundLoad",

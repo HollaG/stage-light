@@ -43,10 +43,17 @@ class Controller
 
     // Loading mode
     bool isLoading = false;
-    char loadingLabel[16];
+    std::string loadingLabel;
     int loadingIndex = 0;
 
     TaskHandle_t saveTaskHandle = NULL;
+
+    // Settings
+    int settingsIndex = 0;
+
+
+    // Delete
+    int deleteIndex = 0;
 public:
     Controller(BaseDisplay *baseDisplay);
 
@@ -67,7 +74,7 @@ public:
     void onUp();
 
 
-    void save();
+    void save(std::string message);
     void load();
 
     void changePage(Page page);

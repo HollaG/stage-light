@@ -38,6 +38,7 @@ void SaveMenuItemWidget::setIsDisplayed()
     this->isDisplayed = true;
 }
 
+// For some reason this isn't working, but still call the function. To be fixed 
 void SaveMenuItemWidget::setHidden()
 {
     this->isDisplayed = false;
