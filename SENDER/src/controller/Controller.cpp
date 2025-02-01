@@ -61,6 +61,10 @@ void Controller::prevSlot()
     slotIndex = (slotIndex - 1 + slotCount) % slotCount;
 }
 
+void Controller::changePage(Page page)
+{
+    currentPage = page;
+}
 void Controller::refreshPage(Adafruit_SSD1306 *display)
 {
     // TODO: should we integrate the loader as a page?
@@ -88,9 +92,9 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     }
 
     // depending on the current page index, refresh the page by calling the relevant functions
-    switch (currentPageIndex)
+    switch (currentPage)
     {
-    case 0:
+    case HOME_PAGE:
     {
         // int red = groups[groupIndex].slots[slotIndex].light.r;
         // int green = groups[groupIndex].slots[slotIndex].light.g;
@@ -115,7 +119,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
         baseDisplay->updateHomePage(display, r, g, b, slotIndex, slotCount, connectedCount, "", mode);
         break;
     };
-    case 1:
+    case SAVE_SLOT_PAGE:
     {
         char groupName[16];
         strcpy(groupName, groups[groupIndex].name);
@@ -150,15 +154,15 @@ void Controller::onScreenLeft()
 
     Serial.println("DEBUG: Screen Left Button Pressed");
 
-    switch (currentPageIndex)
+    switch (currentPage)
     {
-    case 0:
+    case HOME_PAGE:
     {
         // go to Saving page
         if (mode == 1)
         {
 
-            currentPageIndex = 1;
+            changePage(SAVE_SLOT_PAGE);
 
             // SPECIAL: if slotIndex is the last item, then we want to save in the next slot
             if (slotIndex == groups[groupIndex].slotCount - 1)
@@ -180,7 +184,7 @@ void Controller::onScreenLeft()
 
         break;
     };
-    case 1:
+    case SAVE_SLOT_PAGE:
     {
         // TODO: Handle overflow (more than 100)
         // save this
@@ -190,7 +194,7 @@ void Controller::onScreenLeft()
         Serial.printf("Saved in group %d, slot %d\n", groupIndex, saveInSlotIndex);
         Serial.printf("Saved R %d, G %d, B %d\n", frozenLight.r, frozenLight.g, frozenLight.b);
 
-        currentPageIndex = 0;
+        changePage(HOME_PAGE);
 
         // case 1: isInsert = false, saveInSlotIndex = -1
         // => insert at the head of the list
@@ -198,7 +202,8 @@ void Controller::onScreenLeft()
         // => insert at the end of the list
         // case 3: isInsert = true, saveInSlotIndex = any except those 2
         // => insert inbetween
-        if (isInsert == false && saveInSlotIndex == -1) { 
+        if (isInsert == false && saveInSlotIndex == -1)
+        {
             // insert at the head of the list
             for (int i = groups[groupIndex].slotCount; i > 0; i--)
             {
@@ -235,9 +240,9 @@ void Controller::onScreenLeft()
 void Controller::onScreenRight()
 {
 
-    switch (currentPageIndex)
+    switch (currentPage)
     {
-    case 0:
+    case HOME_PAGE:
     {
         // exit saving mode
         if (mode == 1)
@@ -249,10 +254,10 @@ void Controller::onScreenRight()
         break;
     }
 
-    case 1:
+    case SAVE_SLOT_PAGE:
     {
         // CANCEL SAVING
-        currentPageIndex = 0;
+        changePage(HOME_PAGE);
         break;
     }
     }
@@ -264,9 +269,9 @@ void Controller::onSend()
 
 void Controller::onDown()
 {
-    switch (currentPageIndex)
+    switch (currentPage)
     {
-    case 0:
+    case HOME_PAGE:
     {
         if (mode == 1)
             return;
@@ -275,7 +280,7 @@ void Controller::onDown()
         slotIndex = (slotIndex + 1) % groups[groupIndex].slotCount;
         break;
     }
-    case 1:
+    case SAVE_SLOT_PAGE:
     {
         // no looping
         if (saveInSlotIndex == groups[groupIndex].slotCount)
@@ -314,9 +319,9 @@ void Controller::onDown()
 void Controller::onUp()
 {
 
-    switch (currentPageIndex)
+    switch (currentPage)
     {
-    case 0:
+    case HOME_PAGE:
     {
         if (mode == 1)
             return;
@@ -326,7 +331,7 @@ void Controller::onUp()
         slotIndex = (slotIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
         break;
     }
-    case 1:
+    case SAVE_SLOT_PAGE:
     {
 
         if (saveInSlotIndex == -1)

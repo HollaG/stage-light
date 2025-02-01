@@ -26,12 +26,6 @@ SaveSlotPage::SaveSlotPage()
     addWidget(actionButton);
     addWidget(cancelButton);
 
-    // // create 99 save menu items
-    // for (int i = 0; i < 99; i++)
-    // {
-    //     saveMenuItems[i] = new SaveMenuItemWidget(false, false, "", 0, 0);
-    //     addWidget(saveMenuItems[i]);
-    // }
 }
 void SaveSlotPage::update(char *groupName, Slot *slots, int slotCount, int saveInSlotIndex, bool isInsBef)
 {

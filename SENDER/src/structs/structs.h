@@ -33,4 +33,10 @@ struct Group {
     int slotCount;
 };
 
+enum Page { 
+    HOME_PAGE,
+    SAVE_SLOT_PAGE,
+    SETTINGS_PAGE
+};
+
 #endif // STRUCTS_H

@@ -5,6 +5,7 @@
 #include <Preferences.h> // save
 #include "FS.h"
 #include <LittleFS.h>
+#include "structs/structs.h"
 
 class Controller
 {
@@ -17,7 +18,7 @@ class Controller
     // TODO decide if we want to do this
     Light frozenLight = {0, 0, 0, 0, 0, 0}; // When in saving screen, we should disable any modifications
 
-    int currentPageIndex = 0; // hardcoded for now
+    Page currentPage = HOME_PAGE;
 
     // always init to R:0 G:0 B:0
     int slotIndex = 0;
@@ -68,6 +69,8 @@ public:
 
     void save();
     void load();
+
+    void changePage(Page page);
 
 
 private: 
