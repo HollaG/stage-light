@@ -21,7 +21,7 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     // Serial.println("[debug] LittleFS Mounted.");
 
     Group group;
-    char name[16] = "Default";
+    char name[GROUP_NAME_LENGTH] = "Default";
     strcpy(group.name, name);
     group.slotCount = 0;
 
@@ -61,6 +61,12 @@ void Controller::prevSlot()
     slotIndex = (slotIndex - 1 + slotCount) % slotCount;
 }
 
+/**
+ * Change the page to the given page.
+ *
+ * On the next loop() iteration, the display will be updated to reflect the new page.
+ * See `refreshPage()`.
+ */
 void Controller::changePage(Page page)
 {
     currentPage = page;
@@ -72,6 +78,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     // it should be in the page
     // perhaps we should use a "loading" page instead
 
+    // We need to detect when we fail to load something as the save task handle does not get reset for soem reason
     if (saveTaskHandle != NULL)
     {
         eTaskState state = eTaskGetState(saveTaskHandle);
@@ -121,7 +128,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     };
     case SAVE_SLOT_PAGE:
     {
-        char groupName[16];
+        char groupName[GROUP_NAME_LENGTH];
         strcpy(groupName, groups[groupIndex].name);
 
         Slot *slots = groups[groupIndex].slots;
@@ -132,7 +139,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     }
     case SETTINGS_PAGE:
     {
-        char groupName[16];
+        char groupName[GROUP_NAME_LENGTH];
         strcpy(groupName, groups[groupIndex].name);
 
         baseDisplay->updateSettingsPage(display, groupName, settingsIndex);
@@ -140,10 +147,20 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     }
     case DELETE_SLOT_PAGE:
     {
-        char groupName[16];
+        char groupName[GROUP_NAME_LENGTH];
         strcpy(groupName, groups[groupIndex].name);
 
         baseDisplay->updateDeleteSlotPage(display, groupName, groups[groupIndex].slots, deleteIndex, groups[groupIndex].slotCount);
+        break;
+    }
+    case CHANGE_GROUP_PAGE:
+    {
+        baseDisplay->updateChangeGroupPage(display, groups, groupCount, groupSelectionIndex, isInsertGroup, groups[groupIndex].name, newGroupName);
+        break;
+    }
+    case CHARACTER_INPUT_PAGE:
+    {
+        baseDisplay->updateCharacterInputPage(display, newGroupNameAsIndex, currentNewGroupNameLength, maxNewGroupNameLength, isEditing, cursorPosition);
         break;
     }
     default:
@@ -267,6 +284,8 @@ void Controller::onScreenLeft()
         if (settingsIndex == 1)
         {
             // change group
+            groupSelectionIndex = groupIndex;
+            changePage(CHANGE_GROUP_PAGE);
         }
         if (settingsIndex == 2)
         {
@@ -301,6 +320,24 @@ void Controller::onScreenLeft()
         save("Deleting slot...");
         break;
     }
+
+    case CHANGE_GROUP_PAGE:
+    {
+        // todo: handle overwrite
+        // todo: cleaner way to initialize the new group name
+        // what if we exit the page and should we keep the new group name when we come bac
+
+        // initialize new group name to empty
+        changePage(CHARACTER_INPUT_PAGE);
+        break;
+    }
+    case CHARACTER_INPUT_PAGE:
+    {
+        // todo: handle long press
+        // go left
+        cursorPosition = (cursorPosition - 1 + GROUP_NAME_LENGTH) % GROUP_NAME_LENGTH;
+        break;
+    };
     }
 }
 
@@ -341,6 +378,17 @@ void Controller::onScreenRight()
     case DELETE_SLOT_PAGE:
     {
         changePage(SETTINGS_PAGE);
+        break;
+    }
+    case CHANGE_GROUP_PAGE:
+    {
+        changePage(SETTINGS_PAGE);
+        break;
+    }
+    case CHARACTER_INPUT_PAGE:
+    {
+        // go right
+        cursorPosition = (cursorPosition + 1) % GROUP_NAME_LENGTH;
         break;
     }
     }
@@ -407,6 +455,45 @@ void Controller::onDown()
         deleteIndex = (deleteIndex + 1) % groups[groupIndex].slotCount;
         break;
     }
+    case CHANGE_GROUP_PAGE:
+    {
+        // no looping
+        if (groupSelectionIndex == groupCount)
+        {
+        }
+        else
+        {
+            if (groupSelectionIndex == -1 || groupSelectionIndex == 0)
+            {
+                groupSelectionIndex++;
+                isInsertGroup = false;
+            }
+            else if (groupSelectionIndex == groups[groupIndex].slotCount - 1)
+            {
+                groupSelectionIndex++;
+                isInsertGroup = false;
+            }
+            else if (!isInsertGroup)
+            {
+                isInsertGroup = true;
+                groupSelectionIndex++;
+            }
+            else
+            {
+                isInsertGroup = false;
+            }
+        }
+
+        Serial.printf("Now looking at group %d\n", groupSelectionIndex);
+
+        break;
+    }
+    case CHARACTER_INPUT_PAGE:
+    {
+        // go down 1 character in the ASCII format
+        newGroupNameAsIndex[cursorPosition] = (newGroupNameAsIndex[cursorPosition] + 1) % POSSIBLE_CHARS_LENGTH;
+        break;
+    }
     }
 }
 
@@ -464,13 +551,48 @@ void Controller::onUp()
         deleteIndex = (deleteIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
         break;
     }
-    };
+    case CHANGE_GROUP_PAGE:
+    {
+
+        if (groupSelectionIndex == -1)
+        {
+        }
+        else
+        {
+            if (groupSelectionIndex == groupCount || groupSelectionIndex == 0)
+            {
+                groupSelectionIndex--;
+                isInsertGroup = false;
+            }
+            else if (!isInsertGroup)
+            {
+                isInsertGroup = true;
+            }
+            else
+            {
+                isInsertGroup = false;
+
+                groupSelectionIndex--;
+            }
+        }
+        Serial.printf("Now looking at group %d\n", groupSelectionIndex);
+
+        break;
+    }
+
+    case CHARACTER_INPUT_PAGE:
+    {
+        // go up 1 character in the ASCII format
+        newGroupNameAsIndex[cursorPosition] = (newGroupNameAsIndex[cursorPosition] - 1 + POSSIBLE_CHARS_LENGTH) % POSSIBLE_CHARS_LENGTH;
+        break;
+    }
+    }
 }
 
 void Controller::save(std::string message = "Saving slot...")
 {
     isLoading = true;
-    
+
     loadingLabel = message;
 
     xTaskCreate(
@@ -542,13 +664,15 @@ void Controller::load()
         &saveTaskHandle);
 
     isLoading = false;
+    saveTaskHandle = NULL;
 }
 
 void Controller::loadHelper(void *parameter)
 {
     Controller *instance = static_cast<Controller *>(parameter);
     instance->backgroundLoad();
-    vTaskDelete(NULL);
+    vTaskDelete(instance->saveTaskHandle);
+    instance->saveTaskHandle = NULL;
 }
 
 void Controller::backgroundLoad()
@@ -563,6 +687,7 @@ void Controller::backgroundLoad()
     if (!exists)
     {
         Serial.println("[init] No previous data found");
+
         return;
     }
 
@@ -580,6 +705,7 @@ void Controller::backgroundLoad()
     if (!file)
     {
         Serial.println("[error] Failed to open /groups.bin for reading.");
+
         return;
     }
     file.readBytes((char *)groups, sizeof(groups));
@@ -591,6 +717,7 @@ void Controller::backgroundLoad()
     if (!file)
     {
         Serial.println("[error] Failed to open /groupExists.bin for reading.");
+
         return;
     }
     file.readBytes((char *)groupExists, sizeof(groupExists));

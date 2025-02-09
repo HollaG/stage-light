@@ -4,7 +4,7 @@
 BasePage::BasePage()
 {
     // Initialize the widget array to NULL
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 16; i++)
     {
         widgets[i] = NULL;
     }
@@ -13,7 +13,7 @@ BasePage::BasePage()
 // Draw method: Calls draw() on each non-null widget
 void BasePage::draw(Adafruit_SSD1306 *display)
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 16; i++)
     {
         if (widgets[i] != NULL)
         {
@@ -25,7 +25,7 @@ void BasePage::draw(Adafruit_SSD1306 *display)
 // Add a widget to the array
 void BasePage::addWidget(BaseWidget *widget)
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 16; i++)
     {
         if (widgets[i] == NULL)
         {

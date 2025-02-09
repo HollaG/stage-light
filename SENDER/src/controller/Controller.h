@@ -6,6 +6,7 @@
 #include "FS.h"
 #include <LittleFS.h>
 #include "structs/structs.h"
+#include "structs/common.h"
 
 class Controller
 {
@@ -51,9 +52,21 @@ class Controller
     // Settings
     int settingsIndex = 0;
 
-
-    // Delete
+    // Delete Slot Page
     int deleteIndex = 0;
+
+    // Change Group page
+    int groupSelectionIndex = 0;
+    bool isInsertGroup = false;
+
+    // Character Input Page
+    char newGroupName[GROUP_NAME_LENGTH] = "";
+    int newGroupNameAsIndex[GROUP_NAME_LENGTH] = {0};
+    int currentNewGroupNameLength = 0;
+    int maxNewGroupNameLength = GROUP_NAME_LENGTH;
+    bool isEditing = true;
+    int cursorPosition = 0;
+
 public:
     Controller(BaseDisplay *baseDisplay);
 
@@ -73,14 +86,12 @@ public:
     void onDown();
     void onUp();
 
-
     void save(std::string message);
     void load();
 
     void changePage(Page page);
 
-
-private: 
+private:
     void backgroundSave();
     void backgroundLoad();
 

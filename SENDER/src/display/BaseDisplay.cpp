@@ -44,7 +44,8 @@ void BaseDisplay::showSaveSlotPage(Adafruit_SSD1306 *display)
     display->display();
 }
 
-void BaseDisplay::updateSaveSlotPage(Adafruit_SSD1306 *display, char *groupName, Slot *slots, int slotCount, int currentSlot, bool isInsert) {
+void BaseDisplay::updateSaveSlotPage(Adafruit_SSD1306 *display, char *groupName, Slot *slots, int slotCount, int currentSlot, bool isInsert)
+{
 
     // update the values in save slot page
     // call a refresh
@@ -86,7 +87,43 @@ void BaseDisplay::updateDeleteSlotPage(Adafruit_SSD1306 *display, char *groupNam
     showDeleteSlotPage(display);
 }
 
+// Show Change Group Page
+void BaseDisplay::showChangeGroupPage(Adafruit_SSD1306 *display)
+{
+    // Show the change group page
+    display->clearDisplay();
+    display->setCursor(0, 0);
+    changeGroupPage.draw(display);
 
+    // display the updated screen
+    display->display();
+}
+
+void BaseDisplay::updateChangeGroupPage(Adafruit_SSD1306 *display, Group *groups, int groupCount, int groupSelectionIndex, bool isInsert, char *currentGroupName, char *newGroupName)
+{
+    // Update the change group page
+    changeGroupPage.update(groups, groupCount, groupSelectionIndex, isInsert, currentGroupName, newGroupName);
+    showChangeGroupPage(display);
+}
+
+// Show Character Input Page
+void BaseDisplay::showCharacterInputPage(Adafruit_SSD1306 *display)
+{
+    // Show the character input page
+    display->clearDisplay();
+    display->setCursor(0, 0);
+    characterInputPage.draw(display);
+
+    // display the updated screen
+    display->display();
+}
+
+void BaseDisplay::updateCharacterInputPage(Adafruit_SSD1306 *display, int *inputAsIndex, int inputLength, int maxInputLength, bool isEditing, int cursorPosition)
+{
+    // Update the character input page
+    characterInputPage.update(inputAsIndex, inputLength, maxInputLength, isEditing, cursorPosition);
+    showCharacterInputPage(display);
+}
 
 // Show XX Page
 void BaseDisplay::showXXPage()

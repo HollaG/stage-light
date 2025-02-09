@@ -29,18 +29,19 @@ uint8_t broadcastAddress[] = {0x30, 0xae, 0xa4, 0x6a, 0x30, 0xe0}; // 30:ae:a4:6
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
-#define BUTTON_DOWN_PIN 13
-#define BUTTON_UP_PIN 14
-#define BUTTON_SEND_PIN 12
-#define BUTTON_SCREEN_LEFT_PIN 4
-#define BUTTON_SCREEN_RIGHT_PIN 2
+#define BUTTON_DOWN_PIN 14
+#define BUTTON_UP_PIN 2
+#define BUTTON_SEND_PIN 4
+#define BUTTON_SCREEN_LEFT_PIN 13
+#define BUTTON_SCREEN_RIGHT_PIN 12
 
-#define RED_POT 35
-#define GREEN_POT 34
-#define BLUE_POT 32
+#define RED_POT 32
+#define GREEN_POT 35
+#define BLUE_POT 34
 
 #define NUM_LEDS 6
-#define DATA_PIN 19
+#define DATA_PIN 33
+// #define DATA_PIN 36
 
 const char *ssid = "";
 const char *password = "";
@@ -220,11 +221,12 @@ void loop()
     int screenLeft = digitalRead(BUTTON_SCREEN_LEFT_PIN);
     int screenRight = digitalRead(BUTTON_SCREEN_RIGHT_PIN);
 
-    int red = map(analogRead(RED_POT), 0, 4095, 0, 255);
-    int green = map(analogRead(GREEN_POT), 0, 4095, 0, 255);
-    int blue = map(analogRead(BLUE_POT), 0, 4095, 0, 255);
+    int red = 255 - map(analogRead(RED_POT), 0, 4095, 0, 255);
+    int green = 255 - map(analogRead(GREEN_POT), 0, 4095, 0, 255);
+    int blue = 255 - map(analogRead(BLUE_POT), 0, 4095, 0, 255);
 
     // Serial.printf("Red: %d, Green: %d, Blue: %d\n", red, green, blue);
+    // Serial.printf("Down: %d, Up: %d, Send: %d, ScreenLeft: %d, ScreenRight: %d\n", down, up, send, screenLeft, screenRight);
 
     if (down != prevDownState)
     {
@@ -268,7 +270,7 @@ void loop()
             // controller.onSend();
 
             // TEMP: reboot ESP
-            esp_restart();
+            // esp_restart();
         }
     }
 
