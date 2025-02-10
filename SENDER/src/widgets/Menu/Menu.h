@@ -11,11 +11,11 @@ class MenuWidget : public BaseWidget
 public:
     int curIndex;
     int nextIndex;
-    std::string presetName;
+    std::string groupName = "Default";
     int connectedCount;
 
     // Constructor
-    MenuWidget(int x, int y, int curIndex, int nextIndex, std::string presetName, int connectedCount);
+    MenuWidget(int x, int y, int curIndex, int nextIndex, std::string groupName, int connectedCount);
 
     // Draw method
     virtual void draw(Adafruit_SSD1306 *display);
@@ -23,4 +23,5 @@ public:
     // Update value
     void updateIndex(int curIndex, int nextIndex);
     void updateConnectedCount(int connectedCount);
+    void updateGroupName(std::string groupName);
 };

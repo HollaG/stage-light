@@ -22,11 +22,11 @@ void BaseDisplay::showHomePage(Adafruit_SSD1306 *display)
     display->display();
 }
 
-void BaseDisplay::updateHomePage(Adafruit_SSD1306 *display, int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName, int mode)
+void BaseDisplay::updateHomePage(Adafruit_SSD1306 *display, int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string groupName, int mode)
 {
     // update the values in home page
     // call a refresh
-    homePage.update(red, green, blue, slotIndex, slotCount, connectedCount, presetName, mode);
+    homePage.update(red, green, blue, slotIndex, slotCount, connectedCount, groupName, mode);
     showHomePage(display);
 }
 
@@ -99,10 +99,10 @@ void BaseDisplay::showChangeGroupPage(Adafruit_SSD1306 *display)
     display->display();
 }
 
-void BaseDisplay::updateChangeGroupPage(Adafruit_SSD1306 *display, Group *groups, int groupCount, int groupSelectionIndex, bool isInsert, char *currentGroupName, char *newGroupName)
+void BaseDisplay::updateChangeGroupPage(Adafruit_SSD1306 *display, Group *groups, int groupCount, int groupSelectionIndex, bool isInsert, char *currentGroupName)
 {
     // Update the change group page
-    changeGroupPage.update(groups, groupCount, groupSelectionIndex, isInsert, currentGroupName, newGroupName);
+    changeGroupPage.update(groups, groupCount, groupSelectionIndex, isInsert, currentGroupName);
     showChangeGroupPage(display);
 }
 

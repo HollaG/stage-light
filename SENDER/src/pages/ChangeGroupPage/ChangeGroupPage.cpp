@@ -31,7 +31,7 @@ ChangeGroupPage::ChangeGroupPage()
     addWidget(actionButton);
     addWidget(cancelButton);
 }
-void ChangeGroupPage::update(Group *groups, int groupCount, int groupSelectionIndex, bool isInsBef, char *currentGroupName, char *newGroupName)
+void ChangeGroupPage::update(Group *groups, int groupCount, int groupSelectionIndex, bool isInsBef, char *currentGroupName)
 {
     // Update header and groups
     saveMenuHeader->updateName(currentGroupName);

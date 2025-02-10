@@ -15,9 +15,12 @@ CharacterInputPage::CharacterInputPage()
   // create 16 character input widgets
   for (int i = 0; i < GROUP_NAME_LENGTH; i++)
   {
-    characterInputs[i] = new CharacterInputWidget(i * 10, 12);
+    characterInputs[i] = new CharacterInputWidget(i * 10, 22);
     addWidget(characterInputs[i]);
   }
+
+  helpText = new ExplainerTextWidget(0, 0, "Long press TopRight to cancel");
+  addWidget(helpText);
 }
 
 void CharacterInputPage::update(int *inputAsIndexes, int inputLength, int maxInputLength, bool isEditing, int cursorPosition)

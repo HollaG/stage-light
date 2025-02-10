@@ -31,5 +31,5 @@ public:
     SaveMenuItemWidget *currentItem;
 
     // update
-    void update(Group *groups, int groupCount, int groupSelectionIndex, bool isInsert, char *currentGroupName, char *newGroupName);
+    void update(Group *groups, int groupCount, int groupSelectionIndex, bool isInsert, char *currentGroupName);
 };

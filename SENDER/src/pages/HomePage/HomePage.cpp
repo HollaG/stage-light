@@ -41,7 +41,7 @@ HomePage::HomePage()
     addWidget(cueIndicator);
 }
 
-void HomePage::update(int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName, int mode)
+void HomePage::update(int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string groupName, int mode)
 {
     // Update the values in the home page
     // This function will be called from the main loop
@@ -78,11 +78,13 @@ void HomePage::update(int red, int green, int blue, int slotIndex, int slotCount
     // {
     // this->connectedCount = connectedCount;
     menuWidget->updateConnectedCount(connectedCount);
+
     // }
 
-    // if (presetName != "")
+    menuWidget->updateGroupName(groupName);
+    // if (groupName != "")
     // {
-    this->presetName = presetName;
+    this->groupName = groupName;
     // }
 
     cueIndicator->updateCue(slotIndex, slotCount);
@@ -93,7 +95,6 @@ void HomePage::update(int red, int green, int blue, int slotIndex, int slotCount
     {
         actionButton->updateLabel("Save");
         cancelButton->updateLabel("Cancel");
-    
     }
     else
     {

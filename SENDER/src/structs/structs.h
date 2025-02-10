@@ -21,7 +21,7 @@ struct HomePageData
     int curIndex;
     int nextIndex;
     int connectedCount;
-    std::string presetName;
+    std::string groupName;
 };
 
 struct Slot

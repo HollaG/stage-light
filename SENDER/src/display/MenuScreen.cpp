@@ -5,11 +5,13 @@ class MenuScreen : public BaseScreen
 public:
     int curIndex;
     int nextIndex;
-    std::string presetName;
+    std::string groupName;
     int connectedCount;
 
-    MenuScreen(int x, int y, Adafruit_SSD1306* display)  // ✅ Pass pointer
-        : BaseScreen(x, y, display), curIndex(0), nextIndex(0), connectedCount(0) {}
+    MenuScreen(int x, int y, Adafruit_SSD1306 *display) // ✅ Pass pointer
+        : BaseScreen(x, y, display), curIndex(0), nextIndex(0), connectedCount(0)
+    {
+    }
 
     virtual void draw()
     {

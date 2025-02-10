@@ -60,7 +60,6 @@ class Controller
     bool isInsertGroup = false;
 
     // Character Input Page
-    char newGroupName[GROUP_NAME_LENGTH] = "";
     int newGroupNameAsIndex[GROUP_NAME_LENGTH] = {0};
     int currentNewGroupNameLength = 0;
     int maxNewGroupNameLength = GROUP_NAME_LENGTH;
@@ -90,6 +89,7 @@ public:
     void load();
 
     void changePage(Page page);
+    void changeGroup(int groupIndex);
 
 private:
     void backgroundSave();

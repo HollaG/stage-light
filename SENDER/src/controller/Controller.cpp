@@ -36,7 +36,7 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     groupIndex = 0;
     groupCount = 1; // this is a COUNT
 
-    // load();
+    load();
 }
 
 void Controller::updateLight(int red, int green, int blue)
@@ -123,7 +123,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
             b = groups[groupIndex].slots[slotIndex].light.b;
         }
 
-        baseDisplay->updateHomePage(display, r, g, b, slotIndex, slotCount, connectedCount, "", mode);
+        baseDisplay->updateHomePage(display, r, g, b, slotIndex, slotCount, connectedCount, groups[groupIndex].name, mode);
         break;
     };
     case SAVE_SLOT_PAGE:
@@ -155,7 +155,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     }
     case CHANGE_GROUP_PAGE:
     {
-        baseDisplay->updateChangeGroupPage(display, groups, groupCount, groupSelectionIndex, isInsertGroup, groups[groupIndex].name, newGroupName);
+        baseDisplay->updateChangeGroupPage(display, groups, groupCount, groupSelectionIndex, isInsertGroup, groups[groupIndex].name);
         break;
     }
     case CHARACTER_INPUT_PAGE:
@@ -328,7 +328,25 @@ void Controller::onScreenLeft()
         // what if we exit the page and should we keep the new group name when we come bac
 
         // initialize new group name to empty
-        changePage(CHARACTER_INPUT_PAGE);
+        if (isInsertGroup)
+        {
+
+            changePage(CHARACTER_INPUT_PAGE);
+        }
+        else
+        {
+            if (groupSelectionIndex != -1 && groupSelectionIndex != groupCount)
+            {
+                // LOAD
+                groupIndex = groupSelectionIndex;
+                changePage(HOME_PAGE);
+            }
+            else
+            {
+                // SAVE
+                changePage(CHARACTER_INPUT_PAGE);
+            }
+        }
         break;
     }
     case CHARACTER_INPUT_PAGE:
@@ -396,6 +414,52 @@ void Controller::onScreenRight()
 
 void Controller::onSend()
 {
+    switch (currentPage)
+    {
+    case CHARACTER_INPUT_PAGE:
+    {
+        // todo: add a variable to check if this page's purpose
+        // as we would like to reuse this pageas
+        // save the new group name
+        if (isInsertGroup)
+        {
+        }
+        else
+        {
+            // save the new group name
+            // groups[groupSelectionIndex].name = newGroupName;
+            Group newGroup;
+
+            // convert the name from newGroupNameAsIndex to ASCII
+            for (int i = 0; i < GROUP_NAME_LENGTH; i++)
+            {
+                newGroup.name[i] = *POSSIBLE_CHARS[newGroupNameAsIndex[i]];
+            }
+            newGroup.slotCount = 0;
+
+            Light light = {0, 0, 0};
+            Slot slot = {light};
+
+            newGroup.slots[0] = slot;
+            groups[groupSelectionIndex] = newGroup;
+            groupExists[groupSelectionIndex] = true;
+
+            groupCount++;
+            groupIndex = groupSelectionIndex;
+
+            // reset all data in character input page
+            for (int i = 0; i < GROUP_NAME_LENGTH; i++)
+            {
+                newGroupNameAsIndex[i] = 0;
+            }
+            currentNewGroupNameLength = 0;
+            cursorPosition = 0;
+            changePage(HOME_PAGE);
+            save("Saving new group...");
+        }
+        break;
+    }
+    }
 }
 
 void Controller::onDown()
@@ -468,7 +532,7 @@ void Controller::onDown()
                 groupSelectionIndex++;
                 isInsertGroup = false;
             }
-            else if (groupSelectionIndex == groups[groupIndex].slotCount - 1)
+            else if (groupSelectionIndex == groupCount - 1)
             {
                 groupSelectionIndex++;
                 isInsertGroup = false;
@@ -695,8 +759,9 @@ void Controller::backgroundLoad()
 
     // 2️⃣ Load group metadata from Preferences
     prefs.begin("current", true);
-    slotIndex = prefs.getInt("slotIndex", 0);
-    groupIndex = prefs.getInt("groupIndex", 0);
+    // TODO: Don't load the indexes, always reset to default
+    // slotIndex = prefs.getInt("slotIndex", 0);
+    // groupIndex = prefs.getInt("groupIndex", 0);
     groupCount = prefs.getInt("groupCount", 0);
     prefs.end();
 

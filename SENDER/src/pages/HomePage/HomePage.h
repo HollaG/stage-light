@@ -6,7 +6,6 @@
 #include "widgets/ButtonOverlay/ButtonOverlay.h"
 #include "widgets/CueIndicator/CueIndicator.h"
 
-
 class HomePage : public BasePage
 {
 public:
@@ -14,14 +13,16 @@ public:
     HomePage();
 
     // all the relevant data used in homepage should be stored here
-    int curRed; int curGreen; int curBlue;
+    int curRed;
+    int curGreen;
+    int curBlue;
     int curIndex;
     int nextIndex;
 
     int connectedCount;
     int mode;
 
-    std::string presetName;
+    std::string groupName;
 
     // Widgets
     PotWidget *redPot;
@@ -35,11 +36,6 @@ public:
 
     CueIndicatorWidget *cueIndicator;
 
-
-
-    // update 
-    void update(int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName, int mode);
-    
+    // update
+    void update(int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string groupName, int mode);
 };
-
-

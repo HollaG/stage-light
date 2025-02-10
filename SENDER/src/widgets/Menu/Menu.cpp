@@ -2,8 +2,8 @@
 #include <cstdio>
 
 // Constructor Implementation
-MenuWidget::MenuWidget(int x, int y, int curIndex, int nextIndex, std::string presetName, int connectedCount)
-    : BaseWidget(x, y), curIndex(curIndex), nextIndex(nextIndex), presetName(presetName), connectedCount(connectedCount)
+MenuWidget::MenuWidget(int x, int y, int curIndex, int nextIndex, std::string groupName, int connectedCount)
+    : BaseWidget(x, y), curIndex(curIndex), nextIndex(nextIndex), groupName(groupName), connectedCount(connectedCount)
 {
 }
 
@@ -11,7 +11,7 @@ MenuWidget::MenuWidget(int x, int y, int curIndex, int nextIndex, std::string pr
 void MenuWidget::draw(Adafruit_SSD1306 *display)
 {
     // display->printf("%d -> %d", curIndex, nextIndex);
-    display->printf("DONDON");
+    display->printf(groupName.c_str());
     display->drawFastHLine(0, y + 10, 128, SSD1306_WHITE);
 
     // calculate width of "connected devices" text
@@ -23,12 +23,11 @@ void MenuWidget::draw(Adafruit_SSD1306 *display)
 
     display->getTextBounds(buffer, 0, 0, &x1, &y1, &w, &h);
 
-    // draw a 3px circle right before the text 
+    // draw a 3px circle right before the text
     display->fillCircle(128 - w - 10, y + 3, 3, SSD1306_WHITE);
 
     display->setCursor(128 - w, y);
     display->print(this->connectedCount);
-
 }
 
 // Update value
@@ -41,4 +40,9 @@ void MenuWidget::updateIndex(int curIndex, int nextIndex)
 void MenuWidget::updateConnectedCount(int connectedCount)
 {
     this->connectedCount = connectedCount;
+}
+
+void MenuWidget::updateGroupName(std::string groupName)
+{
+    this->groupName = groupName;
 }

@@ -267,7 +267,7 @@ void loop()
         if (send == HIGH)
         {
             // button pressed
-            // controller.onSend();
+            controller.onSend();
 
             // TEMP: reboot ESP
             // esp_restart();

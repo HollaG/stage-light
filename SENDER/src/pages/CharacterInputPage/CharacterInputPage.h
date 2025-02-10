@@ -3,6 +3,7 @@
 #include "widgets/ButtonOverlay/ButtonOverlay.h"
 #include "widgets/CharacterInput/CharacterInput.h"
 #include "structs/common.h"
+#include "widgets/ExplainerText/ExplainerText.h"
 
 class CharacterInputPage : public BasePage
 {
@@ -24,6 +25,8 @@ public:
 
   // array of characterinputs
   CharacterInputWidget *characterInputs[GROUP_NAME_LENGTH];
+
+  ExplainerTextWidget *helpText;
 
   // update
   void update(int *inputAsIndexes, int inputLength, int maxInputLength, bool isEditing, int cursorPosition);

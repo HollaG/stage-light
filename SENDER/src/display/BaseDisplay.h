@@ -25,7 +25,7 @@ public:
 
     // Home page controls
     void showHomePage(Adafruit_SSD1306 *display);
-    void updateHomePage(Adafruit_SSD1306 *display, int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string presetName, int mode);
+    void updateHomePage(Adafruit_SSD1306 *display, int red, int green, int blue, int slotIndex, int slotCount, int connectedCount, std::string groupName, int mode);
 
     void showSaveSlotPage(Adafruit_SSD1306 *display);
     void updateSaveSlotPage(Adafruit_SSD1306 *display, char *groupName, Slot *slots, int slotCount, int currentSlot, bool isInsert);
@@ -37,7 +37,7 @@ public:
     void updateDeleteSlotPage(Adafruit_SSD1306 *display, char *groupName, Slot *slots, int index, int slotCount);
 
     void showChangeGroupPage(Adafruit_SSD1306 *display);
-    void updateChangeGroupPage(Adafruit_SSD1306 *display, Group *groups, int groupCount, int groupSelectionIndex, bool isInsert, char *currentGroupName, char *newGroupName);
+    void updateChangeGroupPage(Adafruit_SSD1306 *display, Group *groups, int groupCount, int groupSelectionIndex, bool isInsert, char *currentGroupName);
 
     void showCharacterInputPage(Adafruit_SSD1306 *display);
     void updateCharacterInputPage(Adafruit_SSD1306 *display, int *inputAsIndex, int inputLength, int maxInputLength, bool isEditing, int cursorPosition);
