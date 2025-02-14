@@ -351,9 +351,52 @@ void Controller::onScreenLeft()
     }
     case CHARACTER_INPUT_PAGE:
     {
-        // todo: handle long press
-        // go left
-        cursorPosition = (cursorPosition - 1 + GROUP_NAME_LENGTH) % GROUP_NAME_LENGTH;
+        if (isEditing)
+        {
+            cursorPosition = (cursorPosition - 1 + GROUP_NAME_LENGTH) % GROUP_NAME_LENGTH;
+        }
+        else
+        {
+            // todo: add a variable to check if this page's purpose
+            // as we would like to reuse this pageas
+            // save the new group name
+            if (isInsertGroup)
+            {
+            }
+            else
+            {
+                // save the new group name
+                // groups[groupSelectionIndex].name = newGroupName;
+                Group newGroup;
+
+                // convert the name from newGroupNameAsIndex to ASCII
+                for (int i = 0; i < GROUP_NAME_LENGTH; i++)
+                {
+                    newGroup.name[i] = *POSSIBLE_CHARS[newGroupNameAsIndex[i]];
+                }
+                newGroup.slotCount = 0;
+
+                Light light = {0, 0, 0};
+                Slot slot = {light};
+
+                newGroup.slots[0] = slot;
+                groups[groupSelectionIndex] = newGroup;
+                groupExists[groupSelectionIndex] = true;
+
+                groupCount++;
+                groupIndex = groupSelectionIndex;
+
+                // reset all data in character input page
+                for (int i = 0; i < GROUP_NAME_LENGTH; i++)
+                {
+                    newGroupNameAsIndex[i] = 0;
+                }
+                currentNewGroupNameLength = 0;
+                cursorPosition = 0;
+                changePage(HOME_PAGE);
+                save("Saving new group...");
+            }
+        }
         break;
     };
     }
@@ -405,8 +448,24 @@ void Controller::onScreenRight()
     }
     case CHARACTER_INPUT_PAGE:
     {
-        // go right
-        cursorPosition = (cursorPosition + 1) % GROUP_NAME_LENGTH;
+        if (isEditing)
+        {
+
+            // go right
+            cursorPosition = (cursorPosition + 1) % GROUP_NAME_LENGTH;
+        }
+        else
+        {
+            changePage(CHANGE_GROUP_PAGE);
+            // reset all data in character input page
+            for (int i = 0; i < GROUP_NAME_LENGTH; i++)
+            {
+                newGroupNameAsIndex[i] = 0;
+            }
+            currentNewGroupNameLength = 0;
+            cursorPosition = 0;
+            isEditing = true;
+        }
         break;
     }
     }
@@ -416,47 +475,16 @@ void Controller::onSend()
 {
     switch (currentPage)
     {
+    case HOME_PAGE:
+    {
+        // send the current light settings
+        CHANGE_MESSAGE change = {0, light.r, light.g, light.b, 0, 0, 0};
+        // espNowConnection.send(&change);
+        break;
+    }
     case CHARACTER_INPUT_PAGE:
     {
-        // todo: add a variable to check if this page's purpose
-        // as we would like to reuse this pageas
-        // save the new group name
-        if (isInsertGroup)
-        {
-        }
-        else
-        {
-            // save the new group name
-            // groups[groupSelectionIndex].name = newGroupName;
-            Group newGroup;
-
-            // convert the name from newGroupNameAsIndex to ASCII
-            for (int i = 0; i < GROUP_NAME_LENGTH; i++)
-            {
-                newGroup.name[i] = *POSSIBLE_CHARS[newGroupNameAsIndex[i]];
-            }
-            newGroup.slotCount = 0;
-
-            Light light = {0, 0, 0};
-            Slot slot = {light};
-
-            newGroup.slots[0] = slot;
-            groups[groupSelectionIndex] = newGroup;
-            groupExists[groupSelectionIndex] = true;
-
-            groupCount++;
-            groupIndex = groupSelectionIndex;
-
-            // reset all data in character input page
-            for (int i = 0; i < GROUP_NAME_LENGTH; i++)
-            {
-                newGroupNameAsIndex[i] = 0;
-            }
-            currentNewGroupNameLength = 0;
-            cursorPosition = 0;
-            changePage(HOME_PAGE);
-            save("Saving new group...");
-        }
+        isEditing = !isEditing;
         break;
     }
     }

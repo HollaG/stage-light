@@ -7,11 +7,13 @@
 #include <LittleFS.h>
 #include "structs/structs.h"
 #include "structs/common.h"
+#include "EspNowConnection/EspNowConnection.h"
 
 class Controller
 {
     Preferences prefs;
     BaseDisplay *baseDisplay;
+    EspNowConnection espNowConnection;
 
     Light light = {0, 0, 0, 0, 0, 0}; // light used in EDITING
     // when we're not in EDIT mode, show the light from preset

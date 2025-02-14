@@ -26,24 +26,35 @@ CharacterInputPage::CharacterInputPage()
 void CharacterInputPage::update(int *inputAsIndexes, int inputLength, int maxInputLength, bool isEditing, int cursorPosition)
 {
   // for each character input widget, update the character
-  Serial.println("-");
+  // Serial.println("-");
 
-  for (int i = 0; i < GROUP_NAME_LENGTH; i++)
+  if (isEditing)
   {
-    Serial.print(inputAsIndexes[i]);
-    Serial.print(" ");
-    if (i == cursorPosition)
+    for (int i = 0; i < GROUP_NAME_LENGTH; i++)
     {
-      characterInputs[i]->isEditingThis(true);
-    }
-    else
-    {
-      characterInputs[i]->isEditingThis(false);
+      // Serial.print(inputAsIndexes[i]);
+      // Serial.print(" ");
+      if (i == cursorPosition)
+      {
+        characterInputs[i]->isEditingThis(true);
+      }
+      else
+      {
+        characterInputs[i]->isEditingThis(false);
+      }
+
+      characterInputs[i]->setCharacter(*POSSIBLE_CHARS[inputAsIndexes[i]]);
+
+      // characterInputs[i]->isEditingThis(isEditing);
     }
 
-    characterInputs[i]->setCharacter(*POSSIBLE_CHARS[inputAsIndexes[i]]);
-
-    // characterInputs[i]->isEditingThis(isEditing);
+    actionButton->updateLabel("<");
+    cancelButton->updateLabel(">");
+  }
+  else
+  {
+    actionButton->updateLabel("Save");
+    cancelButton->updateLabel("Cancel");
   }
 
   // Serial.printf("Cursor position: %d\n", cursorPosition);

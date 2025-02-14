@@ -23,8 +23,15 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 
+#include <esp_pm.h>
+#include <esp_wifi.h>
+#include <esp_wifi_types.h>
+
 // RECEIVER(s) MAC ADDRESS
-uint8_t broadcastAddress[] = {0x30, 0xae, 0xa4, 0x6a, 0x30, 0xe0}; // 30:ae:a4:6a:30:e0
+// uint8_t broadcastAddress[] = {0x30, 0xae, 0xa4, 0x6a, 0x30, 0xe0}; // 30:ae:a4:6a:30:e0
+// uint8_t broadcastAddress[] = {0x94, 0x54, 0xc5, 0x75, 0x7a, 0x38}; // 94:54:c5:75:7a:38
+uint8_t broadcastAddress1[] = {0x24, 0xd7, 0xeb, 0xee, 0xae, 0xf9}; // 24:d7:eb:ee:ae:f9 4m strip
+uint8_t broadcastAddress2[] = {0x24, 0xd7, 0xeb, 0xee, 0xdc, 0x95}; // 24:d7:eb:ee:dc:95
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -43,8 +50,10 @@ uint8_t broadcastAddress[] = {0x30, 0xae, 0xa4, 0x6a, 0x30, 0xe0}; // 30:ae:a4:6
 #define DATA_PIN 33
 // #define DATA_PIN 36
 
-const char *ssid = "";
+const char *ssid = "ESP-NOW";
 const char *password = "";
+
+
 
 void readMacAddress()
 {
@@ -118,6 +127,24 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 // MenuScreen* menuScreen;
 BaseDisplay baseDisplay;
 Controller controller(&baseDisplay);
+
+// wifi
+constexpr char WIFI_SSID[] = "ESP-NOW";
+int32_t getWiFiChannel(const char *ssid)
+{
+    if (int32_t n = WiFi.scanNetworks())
+    {
+        for (uint8_t i = 0; i < n; i++)
+        {
+            if (!strcmp(ssid, WiFi.SSID(i).c_str()))
+            {
+                return WiFi.channel(i);
+            }
+        }
+    }
+    return 0;
+}
+
 void setup()
 {
     if (!LittleFS.begin(true))
@@ -163,33 +190,50 @@ void setup()
     // Display static text
 
     // wifi
-    // WiFi.mode(WIFI_STA);
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.channel(0);
+    // int32_t channel = getWiFiChannel(WIFI_SSID);
     // WiFi.begin(ssid, password);
-    // // Init ESP-NOW
-    // if (esp_now_init() != ESP_OK)
-    // {
-    //     Serial.println("Error initializing ESP-NOW");
-    //     return;
-    // }
+    // esp_wifi_start();
+    // esp_wifi_set_channel(0, WIFI_SECOND_CHAN_NONE);
+    // esp_wifi_set_ps(WIFI_PS_NONE);
 
-    // esp_now_register_send_cb(OnDataSent);
+    WiFi.softAP(ssid, password, 0, 0, 4);
 
-    // Register peer
-    // memcpy(peerInfo.peer_addr, broadcastAddress, 6);
-    // peerInfo.channel = 0;
-    // peerInfo.encrypt = false;
+    // Init ESP-NOW
+    if (esp_now_init() != ESP_OK)
+    {
+        Serial.println("Error initializing ESP-NOW");
+        return;
+    }
 
+    esp_now_register_send_cb(OnDataSent);
+
+    // Register peer1
+    memcpy(peerInfo.peer_addr, broadcastAddress1, 6);
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
     // Add peer
-    // if (esp_now_add_peer(&peerInfo) != ESP_OK)
-    // {
-    //     Serial.println("Failed to add peer");
-    //     return;
-    // }
+    if (esp_now_add_peer(&peerInfo) != ESP_OK)
+    {
+        Serial.println("Failed to add peer");
+        return;
+    }
+
+    // register peer2
+    memcpy(peerInfo.peer_addr, broadcastAddress2, 6);
+    if (esp_now_add_peer(&peerInfo) != ESP_OK)
+    {
+        Serial.println("Failed to add peer");
+        return;
+    }
 
     // add indicator leds
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
     controller.load();
+
+    Serial.println("Ended");
     // controller.refreshPage(&display);
 }
 
@@ -240,7 +284,27 @@ void loop()
             // perfIndex = (perfIndex - 1 + numChanges) % numChanges;
 
             // button pressed
+            Serial.println("[debug] Down Button Pressed");
             controller.onDown();
+
+            if (send != HIGH)
+            {
+                // button pressed
+                // controller.onSend();
+                Serial.println("[debug] Send Button Pressed");
+                Light displayLight = controller.getLight();
+                // Send message via ESP-NOW
+                esp_err_t result = esp_now_send(0, (uint8_t *)&displayLight, sizeof(displayLight));
+
+                if (result == ESP_OK)
+                {
+                    Serial.println("Sent with success");
+                }
+                else
+                {
+                    Serial.println("Error sending the data");
+                }
+            }
         }
     }
 
@@ -255,7 +319,27 @@ void loop()
             // perfIndex = (perfIndex + 1) % (sizeof(changes) / sizeof(changes[0]));
 
             // button pressed
+            Serial.println("[debug] Up Button Pressed");
             controller.onUp();
+
+            if (send != HIGH)
+            {
+                // button pressed
+                // controller.onSend();
+                Serial.println("[debug] Send Button Pressed");
+                Light displayLight = controller.getLight();
+                // Send message via ESP-NOW
+                esp_err_t result = esp_now_send(0, (uint8_t *)&displayLight, sizeof(displayLight));
+
+                if (result == ESP_OK)
+                {
+                    Serial.println("Sent with success");
+                }
+                else
+                {
+                    Serial.println("Error sending the data");
+                }
+            }
         }
     }
 
@@ -264,13 +348,23 @@ void loop()
         prevSendState = send;
 
         changed = true;
-        if (send == HIGH)
+        if (send == LOW)
         {
             // button pressed
             controller.onSend();
+            Serial.println("[debug] Send Button Pressed");
+            Light displayLight = controller.getLight();
+            // Send message via ESP-NOW
+            esp_err_t result = esp_now_send(0, (uint8_t *)&displayLight, sizeof(displayLight));
 
-            // TEMP: reboot ESP
-            // esp_restart();
+            if (result == ESP_OK)
+            {
+                Serial.println("Sent with success");
+            }
+            else
+            {
+                Serial.println("Error sending the data");
+            }
         }
     }
 
@@ -282,6 +376,7 @@ void loop()
         if (screenLeft == HIGH)
         {
             // button pressed
+            Serial.println("[debug] Screen Left Button Pressed");
             controller.onScreenLeft();
         }
     }
@@ -294,6 +389,7 @@ void loop()
         if (screenRight == HIGH)
         {
             // button pressed
+            Serial.println("[debug] Screen Right Button Pressed");
             controller.onScreenRight();
         }
     }
