@@ -7,6 +7,9 @@
 #include <esp_wifi.h>
 #include <esp_now.h>
 
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+
 #include <FastLED.h>
 
 #include <time.h>
@@ -48,12 +51,49 @@ uint8_t broadcastAddress2[] = {0x24, 0xd7, 0xeb, 0xee, 0xdc, 0x95}; // 24:d7:eb:
 
 #define NUM_LEDS 6
 #define DATA_PIN 33
-// #define DATA_PIN 36
 
+// Web Server for control
 const char *ssid = "ESP-NOW";
 const char *password = "";
+/* Put IP Address details */
+IPAddress local_ip(192, 168, 1, 1);
+IPAddress gateway(192, 168, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
 
+AsyncWebServer server(80);
 
+const char index_html[] PROGMEM = R"rawliteral(
+    <!DOCTYPE HTML><html>
+    <head>
+      <title>ESP Web Server</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="icon" href="data:,">
+      <style>
+        html {font-family: Arial; display: inline-block; text-align: center;}
+        h2 {font-size: 3.0rem;}
+        p {font-size: 3.0rem;}
+        body {max-width: 600px; margin:0px auto; padding-bottom: 25px;}
+        .switch {position: relative; display: inline-block; width: 120px; height: 68px} 
+        .switch input {display: none}
+        .slider {position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 6px}
+        .slider:before {position: absolute; content: ""; height: 52px; width: 52px; left: 8px; bottom: 8px; background-color: #fff; -webkit-transition: .4s; transition: .4s; border-radius: 3px}
+        input:checked+.slider {background-color: #b30000}
+        input:checked+.slider:before {-webkit-transform: translateX(52px); -ms-transform: translateX(52px); transform: translateX(52px)}
+      </style>
+    </head>
+    <body>
+      <h2>ESP Web Server</h2>
+      %BUTTONPLACEHOLDER%
+    <script>function toggleCheckbox(element) {
+      var xhr = new XMLHttpRequest();
+      if(element.checked){ xhr.open("GET", "/update?output="+element.id+"&state=1", true); }
+      else { xhr.open("GET", "/update?output="+element.id+"&state=0", true); }
+      xhr.send();
+    }
+    </script>
+    </body>
+    </html>
+    )rawliteral";
 
 void readMacAddress()
 {
@@ -128,23 +168,6 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 BaseDisplay baseDisplay;
 Controller controller(&baseDisplay);
 
-// wifi
-constexpr char WIFI_SSID[] = "ESP-NOW";
-int32_t getWiFiChannel(const char *ssid)
-{
-    if (int32_t n = WiFi.scanNetworks())
-    {
-        for (uint8_t i = 0; i < n; i++)
-        {
-            if (!strcmp(ssid, WiFi.SSID(i).c_str()))
-            {
-                return WiFi.channel(i);
-            }
-        }
-    }
-    return 0;
-}
-
 void setup()
 {
     if (!LittleFS.begin(true))
@@ -199,6 +222,7 @@ void setup()
     // esp_wifi_set_ps(WIFI_PS_NONE);
 
     WiFi.softAP(ssid, password, 0, 0, 4);
+    WiFi.softAPConfig(local_ip, gateway, subnet);
 
     // Init ESP-NOW
     if (esp_now_init() != ESP_OK)
@@ -233,6 +257,15 @@ void setup()
 
     controller.load();
 
+    // startup web server
+    // Print ESP Local IP Address
+    Serial.println(WiFi.softAPIP());
+
+    // Route for root / web page
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send_P(200, "text/html", index_html); });
+
+    server.begin();
     Serial.println("Ended");
     // controller.refreshPage(&display);
 }
