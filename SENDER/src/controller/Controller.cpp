@@ -2,6 +2,9 @@
 #include "bitmaps/loading.h"
 #include <ArduinoJson.h>
 
+// controllers
+#include "subcontrollers/Home/HomeController.h"
+
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
 
@@ -33,9 +36,14 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     groups[0] = group;
     groupExists[0] = true;
 
+    // RFHOME
     slotIndex = 0; // NOTE THAT THIS IS 0-INDEXED
     groupIndex = 0;
     groupCount = 1; // this is a COUNT
+    // END RFHOME
+
+    // initalize page controllers
+    homeController = new HomeController(baseDisplay, this);
 
     load();
 }
@@ -104,27 +112,28 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     {
     case HOME_PAGE:
     {
-        // int red = groups[groupIndex].slots[slotIndex].light.r;
-        // int green = groups[groupIndex].slots[slotIndex].light.g;
-        // int blue = groups[groupIndex].slots[slotIndex].light.b;
-        int slotCount = groups[groupIndex].slotCount;
+        homeController->refreshPage(display);
+        // // int red = groups[groupIndex].slots[slotIndex].light.r;
+        // // int green = groups[groupIndex].slots[slotIndex].light.g;
+        // // int blue = groups[groupIndex].slots[slotIndex].light.b;
+        // int slotCount = groups[groupIndex].slotCount;
 
-        // if editing, then display potentiometer lights, if not, display slot light
-        int r, g, b;
-        if (mode == 1)
-        {
-            r = light.r;
-            g = light.g;
-            b = light.b;
-        }
-        else
-        {
-            r = groups[groupIndex].slots[slotIndex].light.r;
-            g = groups[groupIndex].slots[slotIndex].light.g;
-            b = groups[groupIndex].slots[slotIndex].light.b;
-        }
+        // // if editing, then display potentiometer lights, if not, display slot light
+        // int r, g, b;
+        // if (mode == 1)
+        // {
+        //     r = light.r;
+        //     g = light.g;
+        //     b = light.b;
+        // }
+        // else
+        // {
+        //     r = groups[groupIndex].slots[slotIndex].light.r;
+        //     g = groups[groupIndex].slots[slotIndex].light.g;
+        //     b = groups[groupIndex].slots[slotIndex].light.b;
+        // }
 
-        baseDisplay->updateHomePage(display, r, g, b, slotIndex, slotCount, connectedCount, groups[groupIndex].name, mode);
+        // baseDisplay->updateHomePage(display, r, g, b, slotIndex, slotCount, connectedCount, groups[groupIndex].name, mode);
         break;
     };
     case SAVE_SLOT_PAGE:
@@ -194,29 +203,30 @@ void Controller::onScreenLeft()
     case HOME_PAGE:
     {
         // go to Saving page
-        if (mode == 1)
-        {
+        // if (mode == 1)
+        // {
 
-            changePage(SAVE_SLOT_PAGE);
+        //     changePage(SAVE_SLOT_PAGE);
 
-            // SPECIAL: if slotIndex is the last item, then we want to save in the next slot
-            if (slotIndex == groups[groupIndex].slotCount - 1)
-            {
-                saveInSlotIndex = slotIndex + 1;
-            }
-            else
-            {
-                saveInSlotIndex = slotIndex;
-            }
+        //     // SPECIAL: if slotIndex is the last item, then we want to save in the next slot
+        //     if (slotIndex == groups[groupIndex].slotCount - 1)
+        //     {
+        //         saveInSlotIndex = slotIndex + 1;
+        //     }
+        //     else
+        //     {
+        //         saveInSlotIndex = slotIndex;
+        //     }
 
-            Serial.printf("DEBUG: SaveInSlotIndex %d, slotIndex %d\n", saveInSlotIndex, slotIndex);
-            frozenLight = light;
-        }
-        else
-        {
-            mode = 1;
-        }
+        //     Serial.printf("DEBUG: SaveInSlotIndex %d, slotIndex %d\n", saveInSlotIndex, slotIndex);
+        //     frozenLight = light;
+        // }
+        // else
+        // {
+        //     mode = 1;
+        // }
 
+        homeController->onScreenLeft();
         break;
     };
     case SAVE_SLOT_PAGE:
@@ -412,16 +422,17 @@ void Controller::onScreenRight()
     case HOME_PAGE:
     {
         // exit saving mode
-        if (mode == 1)
-        {
-            // exit saving mode
-            mode = 0;
-        }
-        else
-        {
-            changePage(SETTINGS_PAGE);
-        }
+        // if (mode == 1)
+        // {
+        //     // exit saving mode
+        //     mode = 0;
+        // }
+        // else
+        // {
+        //     changePage(SETTINGS_PAGE);
+        // }
 
+        homeController->onScreenRight();
         break;
     }
 
@@ -497,11 +508,12 @@ void Controller::onDown()
     {
     case HOME_PAGE:
     {
-        if (mode == 1)
-            return;
-        if (groups[groupIndex].slotCount == 0)
-            return;
-        slotIndex = (slotIndex + 1) % groups[groupIndex].slotCount;
+        // if (mode == 1)
+        //     return;
+        // if (groups[groupIndex].slotCount == 0)
+        //     return;
+        // slotIndex = (slotIndex + 1) % groups[groupIndex].slotCount;
+        homeController->onDown();
         break;
     }
     case SAVE_SLOT_PAGE:
@@ -597,12 +609,13 @@ void Controller::onUp()
     {
     case HOME_PAGE:
     {
-        if (mode == 1)
-            return;
+        // if (mode == 1)
+        //     return;
 
-        if (groups[groupIndex].slotCount == 0)
-            return;
-        slotIndex = (slotIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
+        // if (groups[groupIndex].slotCount == 0)
+        //     return;
+        // slotIndex = (slotIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
+        homeController->onUp();
         break;
     }
     case SAVE_SLOT_PAGE:
@@ -825,6 +838,11 @@ Group *Controller::getGroups(int *groupCount)
 {
     *groupCount = this->groupCount;
     return this->groups;
+}
+
+Group *Controller::getGroup(int groupIndex)
+{
+    return &groups[groupIndex];
 }
 
 /**

@@ -10,27 +10,36 @@
 #include "structs/common.h"
 #include "EspNowConnection/EspNowConnection.h"
 
+// page controllers
+// #include "subcontrollers/SaveSlot/SaveSlotController.h"
+// #include "subcontrollers/Home/HomeController.h"
+class HomeController; // forward declaration
+
 class Controller
 {
     Preferences prefs;
     BaseDisplay *baseDisplay;
     EspNowConnection espNowConnection;
+    Page currentPage = HOME_PAGE;
 
+    // initialze subcontrollers
+    HomeController *homeController;
+
+    Group groups[20];
+    bool groupExists[20] = {false};
+
+    // ------ HOME PAGE
     Light light = {0, 0, 0, 0, 0, 0}; // light used in EDITING
     // when we're not in EDIT mode, show the light from preset
 
     // TODO decide if we want to do this
     Light frozenLight = {0, 0, 0, 0, 0, 0}; // When in saving screen, we should disable any modifications
 
-    Page currentPage = HOME_PAGE;
-
     // always init to R:0 G:0 B:0
     int slotIndex = 0;
     int groupIndex = 0;
     int groupCount = 0;
 
-    Group groups[20];
-    bool groupExists[20] = {false};
     // we can have up to 20 "loadouts" of 100 slots each
 
     // 0 "home"
@@ -40,6 +49,8 @@ class Controller
     int connectedCount = 0;
 
     int mode = 0; // 0 = "locked, no edit", 1 = "edit"
+
+    // ----- END HOME PAGE
 
     int saveInSlotIndex = -1;
     int saveInGroupIndex = -1;
@@ -71,6 +82,7 @@ class Controller
 
 public:
     Controller(BaseDisplay *baseDisplay);
+    void refreshPage(Adafruit_SSD1306 *display);
 
     void updateLight(int red, int green, int blue);
     Light getLight();
@@ -79,8 +91,6 @@ public:
 
     void prevSlot();
 
-    void refreshPage(Adafruit_SSD1306 *display);
-
     // BUTTON ACTIONS
     void onScreenLeft();
     void onScreenRight();
@@ -88,17 +98,22 @@ public:
     void onDown();
     void onUp();
 
+    void changePage(Page page);
     void save(std::string message);
     void load();
 
-    void changePage(Page page);
     void changeGroup(int groupIndex);
 
     // for server
     Group *getGroups(int *groupCount);
+    Group *getGroup(int groupIndex);
 
     static String groupOptionsToJson(Group *groups, int groupCount);
     static String groupToJson(Group *group);
+
+    // Getters and Setters
+    // int getEditMode();
+    // Group* getGroups();
 
 private:
     void backgroundSave();
