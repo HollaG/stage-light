@@ -1,7 +1,13 @@
+enum LightType
+{
+  STATIC = 0,
+  CHASE = 1
+};
+
 struct CHANGE_MESSAGE
 {
   // light
-  int light__type; // 0: static, etc
+  LightType light__type; // 0: static, 1: chase
   int r;
   int g;
   int b;

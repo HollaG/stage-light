@@ -31,6 +31,7 @@ CHANGE_MESSAGE change;
 
 int r, g, b;
 bool hasChanged = true;
+LightType lightType = LightType::STATIC;
 
 void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
@@ -45,6 +46,8 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
   r = change.r;
   g = change.g;
   b = change.b;
+
+  lightType = change.light__type;
 
   hasChanged = true;
 
@@ -83,9 +86,40 @@ void setup()
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 }
+void staticLight()
+{
+  for (int i = 0; i < NUM_LEDS / 3; i++)
+  {
+    leds[i] = CRGB(r, g, b);
+  }
+  FastLED.show();
+}
 
+void chaseLight()
+{
+  for (int i = 0; i < NUM_LEDS / 3; i = i + 1)
+  {
+    leds[i] = CRGB(r, g, b);
+    leds[i + 1 % (NUM_LEDS / 3)] = CRGB(r, g, b);
+    leds[i + 2 % (NUM_LEDS / 3)] = CRGB(r, g, b);
+    FastLED.show();
+    delay(60);
+    leds[i] = CRGB::Black;
+    leds[i + 1 % (NUM_LEDS / 3)] = CRGB::Black;
+    leds[i + 2 % (NUM_LEDS / 3)] = CRGB::Black;
+  }
+}
 void loop()
 {
+  switch (lightType)
+  {
+  case LightType::STATIC:
+    staticLight();
+    break;
+  case LightType::CHASE:
+    chaseLight();
+    break;
+  }
   // leds[0] = CRGB::Red;
   // FastLED.show();
   // delay(30);
@@ -101,32 +135,32 @@ void loop()
   // }
 
   // chase
-  for (int i = 0; i < NUM_LEDS / 3; i = i + 1)
-  {
-    leds[i] = CRGB(r, g, b);
-    leds[i + 1 % (NUM_LEDS / 3)] = CRGB(r, g, b);
-    leds[i + 2 % (NUM_LEDS / 3)] = CRGB(r, g, b);
-    FastLED.show();
-    delay(60);
-    leds[i] = CRGB::Black;
-    leds[i + 1 % (NUM_LEDS / 3)] = CRGB::Black;
-    leds[i + 2 % (NUM_LEDS / 3)] = CRGB::Black;
+  // for (int i = 0; i < NUM_LEDS / 3; i = i + 1)
+  // {
+  //   leds[i] = CRGB(r, g, b);
+  //   leds[i + 1 % (NUM_LEDS / 3)] = CRGB(r, g, b);
+  //   leds[i + 2 % (NUM_LEDS / 3)] = CRGB(r, g, b);
+  //   FastLED.show();
+  //   delay(60);
+  //   leds[i] = CRGB::Black;
+  //   leds[i + 1 % (NUM_LEDS / 3)] = CRGB::Black;
+  //   leds[i + 2 % (NUM_LEDS / 3)] = CRGB::Black;
 
-    // for (int j = i; j < i + 3; j++)
-    // {
-    //   leds[j] = CRGB(r, g, b);
-    // }
+  // for (int j = i; j < i + 3; j++)
+  // {
+  //   leds[j] = CRGB(r, g, b);
+  // }
 
-    // FastLED.show();
+  // FastLED.show();
 
-    // for (int j = i; j < i + 3; j++)
-    // {
-    //   leds[j] = CRGB::Black;
-    // }
+  // for (int j = i; j < i + 3; j++)
+  // {
+  //   leds[j] = CRGB::Black;
+  // }
 
-    // delay(30);
-    // }
+  // delay(30);
+  // }
 
-    // FastLED.show();
-  };
+  // FastLED.show();
+  // };
 }
