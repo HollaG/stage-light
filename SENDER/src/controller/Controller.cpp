@@ -1,5 +1,6 @@
 #include "Controller.h"
 #include "bitmaps/loading.h"
+#include <ArduinoJson.h>
 
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
@@ -768,6 +769,7 @@ void Controller::loadHelper(void *parameter)
 }
 
 void Controller::backgroundLoad()
+
 {
     Serial.println("[init] Loading saved data...");
 
@@ -816,4 +818,61 @@ void Controller::backgroundLoad()
     file.readBytes((char *)groupExists, sizeof(groupExists));
     file.close();
     Serial.println("[debug] GroupExists loaded from LittleFS.");
+}
+
+// for server
+Group *Controller::getGroups(int *groupCount)
+{
+    *groupCount = this->groupCount;
+    return this->groups;
+}
+
+/**
+ * Only group names
+ * TODO: abstract this out somehow
+ *
+ * https://arduinojson.org/v7/how-to/upgrade-from-v6/
+ */
+String Controller::groupOptionsToJson(Group *groups, int groupCount)
+{
+    JsonDocument doc; //
+    JsonArray groupsArray = doc["data"].to<JsonArray>();
+    for (int i = 0; i < groupCount; i++)
+    {
+        JsonObject groupObj = groupsArray.add<JsonObject>();
+        groupObj["id"] = i; // Index as ID
+        groupObj["name"] = groups[i].name;
+    }
+
+    String jsonString;
+    serializeJson(doc, jsonString);
+    return jsonString;
+}
+
+/**
+ * Given a slot id
+ */
+String Controller::groupToJson(Group *group)
+{
+    int slotCount = group->slotCount;
+    JsonDocument doc;
+    doc["data"]["name"] = group->name;
+    doc["data"]["slotCount"] = slotCount;
+    JsonArray slotsArray = doc["data"]["slots"].to<JsonArray>();
+    for (int i = 0; i < slotCount; i++)
+    {
+        JsonObject slotObj = slotsArray.add<JsonObject>();
+        slotObj["id"] = i; // Index as ID
+        slotObj["r"] = group->slots[i].light.r;
+        slotObj["g"] = group->slots[i].light.g;
+        slotObj["b"] = group->slots[i].light.b;
+        slotObj["w"] = group->slots[i].light.w;
+        slotObj["ww"] = group->slots[i].light.ww;
+        slotObj["light__type"] = group->slots[i].light.light__type;
+        slotObj["light__transition"] = group->slots[i].light.light__transition;
+    }
+
+    String jsonString;
+    serializeJson(doc, jsonString);
+    return jsonString;
 }

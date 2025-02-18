@@ -1,4 +1,5 @@
 // Controls everything that happens. Has knowledge of all relevant data in the app.
+#pragma once
 #include "display/BaseDisplay.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -92,6 +93,12 @@ public:
 
     void changePage(Page page);
     void changeGroup(int groupIndex);
+
+    // for server
+    Group *getGroups(int *groupCount);
+
+    static String groupOptionsToJson(Group *groups, int groupCount);
+    static String groupToJson(Group *group);
 
 private:
     void backgroundSave();
