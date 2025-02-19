@@ -1,5 +1,16 @@
 #pragma once
 #include "controller/Controller.h"
+
+struct HomeToSaveSlotData
+{
+  int saveInSlotIndex;
+  Light frozenLight;
+};
+
+struct SaveSlotToHomeData
+{
+  int slotIndex;
+};
 class PageController
 {
 
@@ -18,4 +29,7 @@ public:
   virtual void onUp() {};
 
   virtual void refreshPage(Adafruit_SSD1306 *display) {};
+
+  template <typename T>
+  void activate(T data) {}
 };

@@ -3,9 +3,9 @@
 
 class HomeController : PageController
 {
-  int slotIndex = 0;
-  int groupIndex = 0;
-  int groupCount = 0;
+  int *slotIndex;
+  int *groupIndex;
+  int *groupCount;
 
   Light light = {0, 0, 0, 0, 0, 0};
   Light frozenLight = {0, 0, 0, 0, 0, 0};
@@ -26,5 +26,11 @@ public:
   void nextSlot();
   void prevSlot();
 
-  void refreshPage(Adafruit_SSD1306 *display);
+  virtual void refreshPage(Adafruit_SSD1306 *display);
+  virtual void activate(SaveSlotToHomeData data);
+
+  /**
+   * Update the RGB values based on the potentiometer values
+   */
+  void updateLight(int red, int green, int blue);
 };

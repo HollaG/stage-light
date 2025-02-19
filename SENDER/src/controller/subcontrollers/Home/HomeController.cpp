@@ -2,14 +2,29 @@
 
 HomeController::HomeController(BaseDisplay *baseDisplay, Controller *controller) : PageController(baseDisplay, controller)
 {
-  slotIndex = 0; // NOTE THAT THIS IS 0-INDEXED
-  groupIndex = 0;
-  groupCount = 1; // this is a COUNT
+  // slotIndex = &controller->slotIndex; // NOTE THAT THIS IS 0-INDEXED
+  // groupIndex = 0;
+  // groupCount = 1; // this is a COUNT
+
+  this->slotIndex = &controller->slotIndex;
+  this->groupIndex = &controller->groupIndex;
+  this->groupCount = &controller->groupCount;
+}
+
+void HomeController::activate(SaveSlotToHomeData data)
+{
+  // if the slot index exists
+  if (data.slotIndex != -1)
+  {
+    // set the slot index to the given slot index
+    *this->slotIndex = data.slotIndex;
+  }
 }
 
 void HomeController::refreshPage(Adafruit_SSD1306 *display)
 {
-  Group *group = (this->controller->getGroup(groupIndex));
+  Group *group = (this->controller->getCurrentGroup());
+  Slot *currentSlot = this->controller->getCurrentSlot();
   int slotCount = group->slotCount;
 
   // if editing, then display potentiometer lights, if not, display slot light
@@ -22,12 +37,12 @@ void HomeController::refreshPage(Adafruit_SSD1306 *display)
   }
   else
   {
-    r = group->slots[slotIndex].light.r;
-    g = group->slots[slotIndex].light.g;
-    b = group->slots[slotIndex].light.b;
+    r = currentSlot->light.r;
+    g = currentSlot->light.g;
+    b = currentSlot->light.b;
   }
 
-  baseDisplay->updateHomePage(display, r, g, b, slotIndex, slotCount, connectedCount, group->name, mode);
+  baseDisplay->updateHomePage(display, r, g, b, *slotIndex, slotCount, connectedCount, group->name, mode);
 }
 
 void HomeController::onDown()
@@ -37,14 +52,14 @@ void HomeController::onDown()
     return;
   }
 
-  Group *groups = this->controller->getGroups(&this->groupCount);
+  Group *groups = this->controller->getGroups(this->groupCount);
 
-  if (groups[this->groupIndex].slotCount == 0)
+  if (groups[*this->groupIndex].slotCount == 0)
   {
     return;
   }
 
-  this->slotIndex = (this->slotIndex + 1) % groups[this->groupIndex].slotCount;
+  *this->slotIndex = (*this->slotIndex + 1) % groups[*this->groupIndex].slotCount;
   // if (controller->mode == 1) // should we make all of these public?
   //   return;
 }
@@ -55,12 +70,12 @@ void HomeController::onUp()
   {
     return;
   }
-  Group *groups = this->controller->getGroups(&this->groupCount);
-  if (groups[this->groupIndex].slotCount == 0)
+  Group *groups = this->controller->getGroups(this->groupCount);
+  if (groups[*this->groupIndex].slotCount == 0)
   {
     return;
   }
-  this->slotIndex = (this->slotIndex - 1 + groups[this->groupIndex].slotCount) % groups[this->groupIndex].slotCount;
+  *this->slotIndex = (*this->slotIndex - 1 + groups[*this->groupIndex].slotCount) % groups[*this->groupIndex].slotCount;
 }
 
 void HomeController::onScreenLeft()
@@ -69,6 +84,20 @@ void HomeController::onScreenLeft()
   {
     // Change to the Saving Slot page
     // TODO
+
+    int saveInSlotIndex = -1;
+    if (*this->slotIndex == this->controller->getGroup(*this->groupIndex)->slotCount - 1)
+    {
+      saveInSlotIndex = *this->slotIndex + 1;
+    }
+    else
+    {
+      saveInSlotIndex = *this->slotIndex;
+    }
+    // copy this.light into frozenlight
+    Light frozenLight = this->light;
+    HomeToSaveSlotData data = {saveInSlotIndex, frozenLight};
+    this->controller->changePage(SAVE_SLOT_PAGE, &data);
   }
   else
   {
@@ -93,4 +122,12 @@ void HomeController::onSend()
 {
   // Send the light to the ESP-NOW
   // TODO
+}
+
+void HomeController::updateLight(int red, int green, int blue)
+{
+  // Update the light values
+  this->light.r = red;
+  this->light.g = green;
+  this->light.b = blue;
 }
