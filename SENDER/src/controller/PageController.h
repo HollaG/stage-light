@@ -16,6 +16,11 @@ struct AnyToSettingsData
 {
 };
 
+struct AnyToDeleteSlotData
+{
+  int deleteIndex;
+};
+
 class PageController
 {
 

@@ -6,6 +6,7 @@
 #include "subcontrollers/Home/HomeController.h"
 #include "subcontrollers/SaveSlot/SaveSlotController.h"
 #include "subcontrollers/Settings/SettingsController.h"
+#include "subcontrollers/DeleteSlot/DeleteSlotController.h"
 
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
@@ -48,6 +49,7 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     homeController = new HomeController(baseDisplay, this);
     saveSlotController = new SaveSlotController(baseDisplay, this);
     settingsController = new SettingsController(baseDisplay, this);
+    deleteSlotController = new DeleteSlotController(baseDisplay, this);
 
     load();
 }
@@ -96,6 +98,12 @@ void Controller::changePage(Page page, void *data)
     {
         // AnyToSettingsData *castedData = static_cast<AnyToSettingsData *>(data);
         // settingsController->activate(*castedData);
+        break;
+    }
+    case DELETE_SLOT_PAGE:
+    {
+        AnyToDeleteSlotData *castedData = static_cast<AnyToDeleteSlotData *>(data);
+        deleteSlotController->activate(*castedData);
         break;
     }
     }
@@ -184,6 +192,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
         // strcpy(groupName, groups[groupIndex].name);
 
         // baseDisplay->updateDeleteSlotPage(display, groupName, groups[groupIndex].slots, deleteIndex, groups[groupIndex].slotCount);
+        deleteSlotController->refreshPage(display);
         break;
     }
     case CHANGE_GROUP_PAGE:
@@ -308,52 +317,52 @@ void Controller::onScreenLeft()
 
     case SETTINGS_PAGE:
     {
-        // // go to HOME
-        // // changePage(HOME_PAGE);
-        // break;
-        if (settingsIndex == 0)
-        {
-            // delete item
-            deleteIndex = slotIndex;
-            // changePage(DELETE_SLOT_PAGE);
-        }
-        if (settingsIndex == 1)
-        {
-            // change group
-            groupSelectionIndex = groupIndex;
-            // changePage(CHANGE_GROUP_PAGE);
-        }
-        if (settingsIndex == 2)
-        {
-            // Scan for receivers
-            // unimplemented
-        }
 
+        // if (settingsIndex == 0)
+        // {
+        //     // delete item
+        //     deleteIndex = slotIndex;
+        //     // changePage(DELETE_SLOT_PAGE);
+        // }
+        // if (settingsIndex == 1)
+        // {
+        //     // change group
+        //     groupSelectionIndex = groupIndex;
+        //     // changePage(CHANGE_GROUP_PAGE);
+        // }
+        // if (settingsIndex == 2)
+        // {
+        //     // Scan for receivers
+        //     // unimplemented
+        // }
+        settingsController->onScreenLeft();
         break;
     };
     case DELETE_SLOT_PAGE:
     {
         // delete the slot
-        for (int i = deleteIndex; i < groups[groupIndex].slotCount - 1; i++)
-        {
-            groups[groupIndex].slots[i] = groups[groupIndex].slots[i + 1];
-        }
-        groups[groupIndex].slotCount = groups[groupIndex].slotCount - 1;
+        // for (int i = deleteIndex; i < groups[groupIndex].slotCount - 1; i++)
+        // {
+        //     groups[groupIndex].slots[i] = groups[groupIndex].slots[i + 1];
+        // }
+        // groups[groupIndex].slotCount = groups[groupIndex].slotCount - 1;
 
-        // // changePage(HOME_PAGE);
-        if (groups[groupIndex].slotCount == 0)
-        {
-            // changePage(HOME_PAGE);
-        }
-        if (deleteIndex == groups[groupIndex].slotCount)
-        {
-            deleteIndex--;
-        }
-        if (slotIndex == groups[groupIndex].slotCount)
-        {
-            slotIndex--;
-        }
-        save("Deleting slot...");
+        // // // changePage(HOME_PAGE);
+        // if (groups[groupIndex].slotCount == 0)
+        // {
+        //     // changePage(HOME_PAGE);
+        // }
+        // if (deleteIndex == groups[groupIndex].slotCount)
+        // {
+        //     deleteIndex--;
+        // }
+        // if (slotIndex == groups[groupIndex].slotCount)
+        // {
+        //     slotIndex--;
+        // }
+        // save("Deleting slot...");
+
+        deleteSlotController->onScreenLeft();
         break;
     }
 
@@ -478,6 +487,7 @@ void Controller::onScreenRight()
     case DELETE_SLOT_PAGE:
     {
         // changePage(SETTINGS_PAGE);
+        deleteSlotController->onScreenRight();
         break;
     }
     case CHANGE_GROUP_PAGE:
@@ -586,7 +596,8 @@ void Controller::onDown()
     };
     case DELETE_SLOT_PAGE:
     {
-        deleteIndex = (deleteIndex + 1) % groups[groupIndex].slotCount;
+        // deleteIndex = (deleteIndex + 1) % groups[groupIndex].slotCount;
+        deleteSlotController->onDown();
         break;
     }
     case CHANGE_GROUP_PAGE:
@@ -685,7 +696,8 @@ void Controller::onUp()
     }
     case DELETE_SLOT_PAGE:
     {
-        deleteIndex = (deleteIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
+        // deleteIndex = (deleteIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
+        deleteSlotController->onUp();
         break;
     }
     case CHANGE_GROUP_PAGE:

@@ -33,6 +33,28 @@ void SettingsController::onSend()
 
 void SettingsController::onScreenLeft()
 {
+  Serial.printf("Index %d\n", settingsIndex);
+  if (settingsIndex == 0)
+  {
+    // delete item
+    // deleteIndex = slotIndex;
+    // changePage(DELETE_SLOT_PAGE);
+    int deleteIndex = controller->slotIndex;
+    AnyToDeleteSlotData data = {deleteIndex};
+
+    controller->changePage(DELETE_SLOT_PAGE, &data);
+  }
+  if (settingsIndex == 1)
+  {
+    // change group
+    // groupSelectionIndex = groupIndex;
+    // changePage(CHANGE_GROUP_PAGE);
+  }
+  if (settingsIndex == 2)
+  {
+    // Scan for receivers
+    // unimplemented
+  }
 }
 
 void SettingsController::onScreenRight()
