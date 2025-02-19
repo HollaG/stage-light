@@ -21,6 +21,11 @@ struct AnyToDeleteSlotData
   int deleteIndex;
 };
 
+struct AnyToChangeGroupData
+{
+  int groupSelectionIndex;
+};
+
 class PageController
 {
 

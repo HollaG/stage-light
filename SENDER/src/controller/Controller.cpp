@@ -7,6 +7,7 @@
 #include "subcontrollers/SaveSlot/SaveSlotController.h"
 #include "subcontrollers/Settings/SettingsController.h"
 #include "subcontrollers/DeleteSlot/DeleteSlotController.h"
+#include "subcontrollers/ChangeGroup/ChangeGroupController.h"
 
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
@@ -50,6 +51,7 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     saveSlotController = new SaveSlotController(baseDisplay, this);
     settingsController = new SettingsController(baseDisplay, this);
     deleteSlotController = new DeleteSlotController(baseDisplay, this);
+    changeGroupController = new ChangeGroupController(baseDisplay, this);
 
     load();
 }
@@ -91,6 +93,7 @@ void Controller::changePage(Page page, void *data)
     {
         // HomeToSaveSlotData homeToSaveSlotData = static_cast<HomeToSaveSlotData>(data);
         HomeToSaveSlotData *castedData = static_cast<HomeToSaveSlotData *>(data);
+        Serial.println("Made it here");
         saveSlotController->activate(*castedData);
         break;
     }
@@ -104,6 +107,13 @@ void Controller::changePage(Page page, void *data)
     {
         AnyToDeleteSlotData *castedData = static_cast<AnyToDeleteSlotData *>(data);
         deleteSlotController->activate(*castedData);
+        break;
+    }
+
+    case CHANGE_GROUP_PAGE:
+    {
+        AnyToChangeGroupData *castedData = static_cast<AnyToChangeGroupData *>(data);
+        changeGroupController->activate(*castedData);
         break;
     }
     }
@@ -198,6 +208,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     case CHANGE_GROUP_PAGE:
     {
         // baseDisplay->updateChangeGroupPage(display, groups, groupCount, groupSelectionIndex, isInsertGroup, groups[groupIndex].name);
+        changeGroupController->refreshPage(display);
         break;
     }
     case CHARACTER_INPUT_PAGE:
@@ -373,25 +384,26 @@ void Controller::onScreenLeft()
         // what if we exit the page and should we keep the new group name when we come bac
 
         // initialize new group name to empty
-        if (isInsertGroup)
-        {
+        // if (isInsertGroup)
+        // {
 
-            // changePage(CHARACTER_INPUT_PAGE);
-        }
-        else
-        {
-            if (groupSelectionIndex != -1 && groupSelectionIndex != groupCount)
-            {
-                // LOAD
-                groupIndex = groupSelectionIndex;
-                // changePage(HOME_PAGE);
-            }
-            else
-            {
-                // SAVE
-                // changePage(CHARACTER_INPUT_PAGE);
-            }
-        }
+        //     // changePage(CHARACTER_INPUT_PAGE);
+        // }
+        // else
+        // {
+        //     if (groupSelectionIndex != -1 && groupSelectionIndex != groupCount)
+        //     {
+        //         // LOAD
+        //         groupIndex = groupSelectionIndex;
+        //         // changePage(HOME_PAGE);
+        //     }
+        //     else
+        //     {
+        //         // SAVE
+        //         // changePage(CHARACTER_INPUT_PAGE);
+        //     }
+        // }
+        changeGroupController->onScreenLeft();
         break;
     }
     case CHARACTER_INPUT_PAGE:
@@ -493,6 +505,7 @@ void Controller::onScreenRight()
     case CHANGE_GROUP_PAGE:
     {
         // changePage(SETTINGS_PAGE);
+        changeGroupController->onScreenRight();
         break;
     }
     case CHARACTER_INPUT_PAGE:
@@ -602,34 +615,8 @@ void Controller::onDown()
     }
     case CHANGE_GROUP_PAGE:
     {
-        // no looping
-        if (groupSelectionIndex == groupCount)
-        {
-        }
-        else
-        {
-            if (groupSelectionIndex == -1 || groupSelectionIndex == 0)
-            {
-                groupSelectionIndex++;
-                isInsertGroup = false;
-            }
-            else if (groupSelectionIndex == groupCount - 1)
-            {
-                groupSelectionIndex++;
-                isInsertGroup = false;
-            }
-            else if (!isInsertGroup)
-            {
-                isInsertGroup = true;
-                groupSelectionIndex++;
-            }
-            else
-            {
-                isInsertGroup = false;
-            }
-        }
 
-        Serial.printf("Now looking at group %d\n", groupSelectionIndex);
+        changeGroupController->onDown();
 
         break;
     }
@@ -703,28 +690,7 @@ void Controller::onUp()
     case CHANGE_GROUP_PAGE:
     {
 
-        if (groupSelectionIndex == -1)
-        {
-        }
-        else
-        {
-            if (groupSelectionIndex == groupCount || groupSelectionIndex == 0)
-            {
-                groupSelectionIndex--;
-                isInsertGroup = false;
-            }
-            else if (!isInsertGroup)
-            {
-                isInsertGroup = true;
-            }
-            else
-            {
-                isInsertGroup = false;
-
-                groupSelectionIndex--;
-            }
-        }
-        Serial.printf("Now looking at group %d\n", groupSelectionIndex);
+        changeGroupController->onUp();
 
         break;
     }
@@ -736,6 +702,11 @@ void Controller::onUp()
         break;
     }
     }
+}
+
+void Controller::changeGroup(int groupIndex)
+{
+    this->groupIndex = groupIndex;
 }
 
 void Controller::save(std::string message = "Saving slot...")

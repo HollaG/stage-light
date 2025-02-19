@@ -17,6 +17,7 @@ class HomeController; // forward declaration
 class SaveSlotController;
 class SettingsController;
 class DeleteSlotController;
+class ChangeGroupController;
 
 class Controller
 {
@@ -30,6 +31,7 @@ class Controller
     SaveSlotController *saveSlotController;
     SettingsController *settingsController;
     DeleteSlotController *deleteSlotController;
+    ChangeGroupController *changeGroupController;
 
     // ------ HOME PAGE
     Light light = {0, 0, 0, 0, 0, 0}; // light used in EDITING

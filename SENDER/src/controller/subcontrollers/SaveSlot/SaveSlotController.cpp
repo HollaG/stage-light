@@ -6,14 +6,19 @@ SaveSlotController::SaveSlotController(BaseDisplay *baseDisplay, Controller *con
 
 void SaveSlotController::activate(HomeToSaveSlotData data)
 {
+  Serial.printf("Activated SaveSlotController with slot index %d\n", data.saveInSlotIndex);
   saveInSlotIndex = data.saveInSlotIndex;
   frozenLight = data.frozenLight;
+  Serial.printf("Frozen light is %d, %d, %d\n", frozenLight.r, frozenLight.g, frozenLight.b);
+  isInsert = false;
 }
 
 void SaveSlotController::refreshPage(Adafruit_SSD1306 *display)
 {
-  char groupName[GROUP_NAME_LENGTH];
-  strcpy(groupName, this->controller->groups[this->controller->groupIndex].name);
+  char groupName[GROUP_NAME_LENGTH + 1];
+
+  strncpy(groupName, "HelloWorld12", sizeof(groupName) - 1); // Copy up to 12 characters
+  groupName[sizeof(groupName) - 1] = '\0';
 
   baseDisplay->updateSaveSlotPage(display, groupName, this->controller->groups[this->controller->groupIndex].slots, this->controller->groups[this->controller->groupIndex].slotCount, saveInSlotIndex, isInsert);
 }

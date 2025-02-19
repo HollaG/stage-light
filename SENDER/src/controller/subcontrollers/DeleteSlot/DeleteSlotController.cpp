@@ -12,7 +12,8 @@ void DeleteSlotController::activate(AnyToDeleteSlotData data)
 void DeleteSlotController::refreshPage(Adafruit_SSD1306 *display)
 {
   char groupName[GROUP_NAME_LENGTH];
-  strcpy(groupName, controller->getCurrentGroup()->name);
+  strncpy(groupName, controller->getCurrentGroup()->name, sizeof(groupName) - 1);
+  groupName[sizeof(groupName) - 1] = '\0';
 
   baseDisplay->updateDeleteSlotPage(display, groupName, controller->getCurrentGroup()->slots, deleteIndex, controller->getCurrentGroup()->slotCount);
 }

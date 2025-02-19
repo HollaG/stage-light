@@ -16,6 +16,7 @@ void HomeController::activate(AnyToHomeData data)
   // if the slot index exists
   if (data.slotIndex != -1)
   {
+    Serial.printf("Set slot index to %d\n", data.slotIndex);
     // set the slot index to the given slot index
     *this->slotIndex = data.slotIndex;
   }
@@ -94,9 +95,13 @@ void HomeController::onScreenLeft()
     {
       saveInSlotIndex = *this->slotIndex;
     }
+
     // copy this.light into frozenlight
     Light frozenLight = this->light;
+
     HomeToSaveSlotData data = {saveInSlotIndex, frozenLight};
+    Serial.printf("save in slot index %d\n", saveInSlotIndex);
+    Serial.printf("frozen light r %d, g %d, b %d\n", frozenLight.r, frozenLight.g, frozenLight.b);
     this->controller->changePage(SAVE_SLOT_PAGE, &data);
   }
   else

@@ -12,7 +12,8 @@ void SettingsController::activate(AnyToSettingsData data = AnyToSettingsData())
 void SettingsController::refreshPage(Adafruit_SSD1306 *display)
 {
   char groupName[GROUP_NAME_LENGTH];
-  strcpy(groupName, controller->getCurrentGroup()->name);
+  strncpy(groupName, controller->getCurrentGroup()->name, sizeof(groupName) - 1);
+  groupName[sizeof(groupName) - 1] = '\0';
 
   baseDisplay->updateSettingsPage(display, groupName, settingsIndex);
 }
@@ -49,6 +50,8 @@ void SettingsController::onScreenLeft()
     // change group
     // groupSelectionIndex = groupIndex;
     // changePage(CHANGE_GROUP_PAGE);
+    AnyToChangeGroupData data = {controller->groupIndex};
+    controller->changePage(CHANGE_GROUP_PAGE, &data);
   }
   if (settingsIndex == 2)
   {
