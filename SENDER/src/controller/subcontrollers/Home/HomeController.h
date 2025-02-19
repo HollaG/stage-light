@@ -27,7 +27,7 @@ public:
   void prevSlot();
 
   virtual void refreshPage(Adafruit_SSD1306 *display);
-  virtual void activate(SaveSlotToHomeData data);
+  virtual void activate(AnyToHomeData data);
 
   /**
    * Update the RGB values based on the potentiometer values

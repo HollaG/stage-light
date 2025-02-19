@@ -5,6 +5,7 @@
 // controllers
 #include "subcontrollers/Home/HomeController.h"
 #include "subcontrollers/SaveSlot/SaveSlotController.h"
+#include "subcontrollers/Settings/SettingsController.h"
 
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
@@ -46,6 +47,7 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     // initalize page controllers
     homeController = new HomeController(baseDisplay, this);
     saveSlotController = new SaveSlotController(baseDisplay, this);
+    settingsController = new SettingsController(baseDisplay, this);
 
     load();
 }
@@ -62,7 +64,7 @@ void Controller::updateLight(int red, int green, int blue)
 }
 
 // template void Controller::changePage<HomeToSaveSlotData>(Page, HomeToSaveSlotData);
-// template void Controller::changePage<SaveSlotToHomeData>(Page, SaveSlotToHomeData);
+// template void Controller::changePage<AnyToHomeData>(Page, AnyToHomeData);
 /**d
  * Change the page to the given page.
  *
@@ -78,8 +80,8 @@ void Controller::changePage(Page page, void *data)
     {
     case HOME_PAGE:
     {
-        // SaveSlotToHomeData saveSlotToHomeData = static_cast<SaveSlotToHomeData>(data);
-        SaveSlotToHomeData *castedData = static_cast<SaveSlotToHomeData *>(data);
+        // AnyToHomeData saveSlotToHomeData = static_cast<AnyToHomeData>(data);
+        AnyToHomeData *castedData = static_cast<AnyToHomeData *>(data);
         homeController->activate(*castedData);
         break;
     }
@@ -88,6 +90,12 @@ void Controller::changePage(Page page, void *data)
         // HomeToSaveSlotData homeToSaveSlotData = static_cast<HomeToSaveSlotData>(data);
         HomeToSaveSlotData *castedData = static_cast<HomeToSaveSlotData *>(data);
         saveSlotController->activate(*castedData);
+        break;
+    }
+    case SETTINGS_PAGE:
+    {
+        // AnyToSettingsData *castedData = static_cast<AnyToSettingsData *>(data);
+        // settingsController->activate(*castedData);
         break;
     }
     }
@@ -167,6 +175,7 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
         // strcpy(groupName, groups[groupIndex].name);
 
         // baseDisplay->updateSettingsPage(display, groupName, settingsIndex);
+        settingsController->refreshPage(display);
         break;
     }
     case DELETE_SLOT_PAGE:
@@ -463,6 +472,7 @@ void Controller::onScreenRight()
     case SETTINGS_PAGE:
     {
         // changePage(HOME_PAGE);
+        settingsController->onScreenRight();
         break;
     }
     case DELETE_SLOT_PAGE:
@@ -570,8 +580,8 @@ void Controller::onDown()
     }
     case SETTINGS_PAGE:
     {
-        // go to HOME
-        settingsIndex = (settingsIndex + 1) % SETTINGS_COUNT;
+
+        settingsController->onDown();
         break;
     };
     case DELETE_SLOT_PAGE:
@@ -669,7 +679,8 @@ void Controller::onUp()
     case SETTINGS_PAGE:
     {
 
-        settingsIndex = (settingsIndex - 1 + SETTINGS_COUNT) % SETTINGS_COUNT;
+        // settingsIndex = (settingsIndex - 1 + SETTINGS_COUNT) % SETTINGS_COUNT;
+        settingsController->onUp();
         break;
     }
     case DELETE_SLOT_PAGE:

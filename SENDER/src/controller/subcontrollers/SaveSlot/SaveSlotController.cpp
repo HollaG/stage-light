@@ -138,12 +138,12 @@ void SaveSlotController::onScreenLeft()
   this->controller->save("Saving slot...");
 
   // change page back to home page
-  SaveSlotToHomeData data = {toDisplaySlotIndex};
+  AnyToHomeData data = {toDisplaySlotIndex};
   this->controller->changePage(HOME_PAGE, &data);
 }
 void SaveSlotController::onScreenRight()
 {
   // cancel saving
-  SaveSlotToHomeData data = {-1};
+  AnyToHomeData data = {-1};
   this->controller->changePage(HOME_PAGE, &data);
 }

@@ -7,10 +7,15 @@ struct HomeToSaveSlotData
   Light frozenLight;
 };
 
-struct SaveSlotToHomeData
+struct AnyToHomeData
 {
   int slotIndex;
 };
+
+struct AnyToSettingsData
+{
+};
+
 class PageController
 {
 

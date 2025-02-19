@@ -15,6 +15,7 @@
 // #include "subcontrollers/Home/HomeController.h"
 class HomeController; // forward declaration
 class SaveSlotController;
+class SettingsController;
 
 class Controller
 {
@@ -26,6 +27,7 @@ class Controller
     // initialze subcontrollers
     HomeController *homeController;
     SaveSlotController *saveSlotController;
+    SettingsController *settingsController;
 
     // ------ HOME PAGE
     Light light = {0, 0, 0, 0, 0, 0}; // light used in EDITING

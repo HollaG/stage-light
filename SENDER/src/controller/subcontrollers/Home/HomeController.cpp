@@ -11,7 +11,7 @@ HomeController::HomeController(BaseDisplay *baseDisplay, Controller *controller)
   this->groupCount = &controller->groupCount;
 }
 
-void HomeController::activate(SaveSlotToHomeData data)
+void HomeController::activate(AnyToHomeData data)
 {
   // if the slot index exists
   if (data.slotIndex != -1)
@@ -113,8 +113,7 @@ void HomeController::onScreenRight()
   }
   else
   {
-    // Change to the Settings page
-    // TODO
+    this->controller->changePage(SETTINGS_PAGE, NULL);
   }
 }
 
