@@ -18,6 +18,7 @@ class SaveSlotController;
 class SettingsController;
 class DeleteSlotController;
 class ChangeGroupController;
+class CharacterInputController;
 
 class Controller
 {
@@ -32,6 +33,7 @@ class Controller
     SettingsController *settingsController;
     DeleteSlotController *deleteSlotController;
     ChangeGroupController *changeGroupController;
+    CharacterInputController *characterInputController;
 
     // ------ HOME PAGE
     Light light = {0, 0, 0, 0, 0, 0}; // light used in EDITING
@@ -56,8 +58,8 @@ class Controller
     // ----- END HOME PAGE
 
     // int saveInSlotIndex = -1;
-    int saveInGroupIndex = -1;
-    bool isInsert = false;
+    // int saveInGroupIndex = -1;
+    // bool isInsert = false;
 
     // Loading mode
     bool isLoading = false;
@@ -67,14 +69,14 @@ class Controller
     TaskHandle_t saveTaskHandle = NULL;
 
     // Settings
-    int settingsIndex = 0;
+    // int settingsIndex = 0;
 
     // Delete Slot Page
-    int deleteIndex = 0;
+    // int deleteIndex = 0;
 
     // Change Group page
-    int groupSelectionIndex = 0;
-    bool isInsertGroup = false;
+    // int groupSelectionIndex = 0;
+    // bool isInsertGroup = false;
 
     // Character Input Page
     int newGroupNameAsIndex[GROUP_NAME_LENGTH] = {0};

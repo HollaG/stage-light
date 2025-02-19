@@ -103,6 +103,8 @@ void ChangeGroupController::onScreenLeft()
     {
       // SAVE
       // changePage(CHARACTER_INPUT_PAGE);
+      AnyToCharacterInputData data = {isInsertGroup, groupSelectionIndex};
+      this->controller->changePage(CHARACTER_INPUT_PAGE, &data);
     }
   }
 }

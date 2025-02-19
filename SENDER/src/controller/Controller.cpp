@@ -8,6 +8,7 @@
 #include "subcontrollers/Settings/SettingsController.h"
 #include "subcontrollers/DeleteSlot/DeleteSlotController.h"
 #include "subcontrollers/ChangeGroup/ChangeGroupController.h"
+#include "subcontrollers/CharacterInput/CharacterInputController.h"
 
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
@@ -52,6 +53,7 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     settingsController = new SettingsController(baseDisplay, this);
     deleteSlotController = new DeleteSlotController(baseDisplay, this);
     changeGroupController = new ChangeGroupController(baseDisplay, this);
+    characterInputController = new CharacterInputController(baseDisplay, this);
 
     load();
 }
@@ -114,6 +116,12 @@ void Controller::changePage(Page page, void *data)
     {
         AnyToChangeGroupData *castedData = static_cast<AnyToChangeGroupData *>(data);
         changeGroupController->activate(*castedData);
+        break;
+    }
+    case CHARACTER_INPUT_PAGE:
+    {
+        AnyToCharacterInputData *castedData = static_cast<AnyToCharacterInputData *>(data);
+        characterInputController->activate(*castedData);
         break;
     }
     }
@@ -213,7 +221,8 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     }
     case CHARACTER_INPUT_PAGE:
     {
-        baseDisplay->updateCharacterInputPage(display, newGroupNameAsIndex, currentNewGroupNameLength, maxNewGroupNameLength, isEditing, cursorPosition);
+        // baseDisplay->updateCharacterInputPage(display, newGroupNameAsIndex, currentNewGroupNameLength, maxNewGroupNameLength, isEditing, cursorPosition);
+        characterInputController->refreshPage(display);
         break;
     }
     default:
@@ -408,52 +417,7 @@ void Controller::onScreenLeft()
     }
     case CHARACTER_INPUT_PAGE:
     {
-        if (isEditing)
-        {
-            cursorPosition = (cursorPosition - 1 + GROUP_NAME_LENGTH) % GROUP_NAME_LENGTH;
-        }
-        else
-        {
-            // todo: add a variable to check if this page's purpose
-            // as we would like to reuse this pageas
-            // save the new group name
-            if (isInsertGroup)
-            {
-            }
-            else
-            {
-                // save the new group name
-                // groups[groupSelectionIndex].name = newGroupName;
-                Group newGroup;
-
-                // convert the name from newGroupNameAsIndex to ASCII
-                for (int i = 0; i < GROUP_NAME_LENGTH; i++)
-                {
-                    newGroup.name[i] = *POSSIBLE_CHARS[newGroupNameAsIndex[i]];
-                }
-                newGroup.slotCount = 0;
-
-                Light light = {0, 0, 0};
-                Slot slot = {light};
-
-                newGroup.slots[0] = slot;
-                groups[groupSelectionIndex] = newGroup;
-                groupExists[groupSelectionIndex] = true;
-
-                groupCount++;
-                groupIndex = groupSelectionIndex;
-
-                // reset all data in character input page
-                for (int i = 0; i < GROUP_NAME_LENGTH; i++)
-                {
-                    newGroupNameAsIndex[i] = 0;
-                }
-                currentNewGroupNameLength = 0;
-                cursorPosition = 0;
-                // changePage(HOME_PAGE);
-                save("Saving new group...");
-            }
-        }
+        characterInputController->onScreenLeft();
         break;
     };
     }
@@ -510,24 +474,8 @@ void Controller::onScreenRight()
     }
     case CHARACTER_INPUT_PAGE:
     {
-        if (isEditing)
-        {
+        characterInputController->onScreenRight();
 
-            // go right
-            cursorPosition = (cursorPosition + 1) % GROUP_NAME_LENGTH;
-        }
-        else
-        {
-            // changePage(CHANGE_GROUP_PAGE);
-            // reset all data in character input page
-            for (int i = 0; i < GROUP_NAME_LENGTH; i++)
-            {
-                newGroupNameAsIndex[i] = 0;
-            }
-            currentNewGroupNameLength = 0;
-            cursorPosition = 0;
-            isEditing = true;
-        }
         break;
     }
     }
@@ -546,7 +494,8 @@ void Controller::onSend()
     }
     case CHARACTER_INPUT_PAGE:
     {
-        isEditing = !isEditing;
+        // isEditing = !isEditing;
+        characterInputController->onSend();
         break;
     }
     }
@@ -622,8 +571,7 @@ void Controller::onDown()
     }
     case CHARACTER_INPUT_PAGE:
     {
-        // go down 1 character in the ASCII format
-        newGroupNameAsIndex[cursorPosition] = (newGroupNameAsIndex[cursorPosition] + 1) % POSSIBLE_CHARS_LENGTH;
+        characterInputController->onDown();
         break;
     }
     }
@@ -697,8 +645,8 @@ void Controller::onUp()
 
     case CHARACTER_INPUT_PAGE:
     {
-        // go up 1 character in the ASCII format
-        newGroupNameAsIndex[cursorPosition] = (newGroupNameAsIndex[cursorPosition] - 1 + POSSIBLE_CHARS_LENGTH) % POSSIBLE_CHARS_LENGTH;
+        characterInputController->onUp();
+
         break;
     }
     }

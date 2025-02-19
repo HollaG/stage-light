@@ -26,6 +26,12 @@ struct AnyToChangeGroupData
   int groupSelectionIndex;
 };
 
+struct AnyToCharacterInputData
+{
+  bool isInsertGroup;
+  int groupSelectionIndex;
+};
+
 class PageController
 {
 
