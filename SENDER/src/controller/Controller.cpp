@@ -69,15 +69,13 @@ void Controller::updateLight(int red, int green, int blue)
     homeController->updateLight(red, green, blue);
 }
 
-// template void Controller::changePage<HomeToSaveSlotData>(Page, HomeToSaveSlotData);
-// template void Controller::changePage<AnyToHomeData>(Page, AnyToHomeData);
-/**d
+/**
  * Change the page to the given page.
  *
  * On the next loop() iteration, the display will be updated to reflect the new page.
  * See `refreshPage()`.
  */
-// template <typename T>
+
 void Controller::changePage(Page page, void *data)
 {
     currentPage = page;
@@ -86,14 +84,12 @@ void Controller::changePage(Page page, void *data)
     {
     case HOME_PAGE:
     {
-        // AnyToHomeData saveSlotToHomeData = static_cast<AnyToHomeData>(data);
         AnyToHomeData *castedData = static_cast<AnyToHomeData *>(data);
         homeController->activate(*castedData);
         break;
     }
     case SAVE_SLOT_PAGE:
     {
-        // HomeToSaveSlotData homeToSaveSlotData = static_cast<HomeToSaveSlotData>(data);
         HomeToSaveSlotData *castedData = static_cast<HomeToSaveSlotData *>(data);
         Serial.println("Made it here");
         saveSlotController->activate(*castedData);
@@ -101,8 +97,7 @@ void Controller::changePage(Page page, void *data)
     }
     case SETTINGS_PAGE:
     {
-        // AnyToSettingsData *castedData = static_cast<AnyToSettingsData *>(data);
-        // settingsController->activate(*castedData);
+        // Nothing needs to be done here
         break;
     }
     case DELETE_SLOT_PAGE:
@@ -160,68 +155,30 @@ void Controller::refreshPage(Adafruit_SSD1306 *display)
     case HOME_PAGE:
     {
         homeController->refreshPage(display);
-        // // int red = groups[groupIndex].slots[slotIndex].light.r;
-        // // int green = groups[groupIndex].slots[slotIndex].light.g;
-        // // int blue = groups[groupIndex].slots[slotIndex].light.b;
-        // int slotCount = groups[groupIndex].slotCount;
-
-        // // if editing, then display potentiometer lights, if not, display slot light
-        // int r, g, b;
-        // if (mode == 1)
-        // {
-        //     r = light.r;
-        //     g = light.g;
-        //     b = light.b;
-        // }
-        // else
-        // {
-        //     r = groups[groupIndex].slots[slotIndex].light.r;
-        //     g = groups[groupIndex].slots[slotIndex].light.g;
-        //     b = groups[groupIndex].slots[slotIndex].light.b;
-        // }
-
-        // baseDisplay->updateHomePage(display, r, g, b, slotIndex, slotCount, connectedCount, groups[groupIndex].name, mode);
         break;
     };
     case SAVE_SLOT_PAGE:
     {
-        // char groupName[GROUP_NAME_LENGTH];
-        // strcpy(groupName, groups[groupIndex].name);
-
-        // Slot *slots = groups[groupIndex].slots;
-        // int slotCount = groups[groupIndex].slotCount;
-
-        // baseDisplay->updateSaveSlotPage(display, groupName, slots, slotCount, saveInSlotIndex, isInsert);
         saveSlotController->refreshPage(display);
         break;
     }
     case SETTINGS_PAGE:
     {
-        // char groupName[GROUP_NAME_LENGTH];
-        // strcpy(groupName, groups[groupIndex].name);
-
-        // baseDisplay->updateSettingsPage(display, groupName, settingsIndex);
         settingsController->refreshPage(display);
         break;
     }
     case DELETE_SLOT_PAGE:
     {
-        // char groupName[GROUP_NAME_LENGTH];
-        // strcpy(groupName, groups[groupIndex].name);
-
-        // baseDisplay->updateDeleteSlotPage(display, groupName, groups[groupIndex].slots, deleteIndex, groups[groupIndex].slotCount);
         deleteSlotController->refreshPage(display);
         break;
     }
     case CHANGE_GROUP_PAGE:
     {
-        // baseDisplay->updateChangeGroupPage(display, groups, groupCount, groupSelectionIndex, isInsertGroup, groups[groupIndex].name);
         changeGroupController->refreshPage(display);
         break;
     }
     case CHARACTER_INPUT_PAGE:
     {
-        // baseDisplay->updateCharacterInputPage(display, newGroupNameAsIndex, currentNewGroupNameLength, maxNewGroupNameLength, isEditing, cursorPosition);
         characterInputController->refreshPage(display);
         break;
     }
@@ -255,82 +212,11 @@ void Controller::onScreenLeft()
     {
     case HOME_PAGE:
     {
-        // go to Saving page
-        // if (mode == 1)
-        // {
-
-        //     // changePage(SAVE_SLOT_PAGE);
-
-        //     // SPECIAL: if slotIndex is the last item, then we want to save in the next slot
-        //     if (slotIndex == groups[groupIndex].slotCount - 1)
-        //     {
-        //         saveInSlotIndex = slotIndex + 1;
-        //     }
-        //     else
-        //     {
-        //         saveInSlotIndex = slotIndex;
-        //     }
-
-        //     Serial.printf("DEBUG: SaveInSlotIndex %d, slotIndex %d\n", saveInSlotIndex, slotIndex);
-        //     frozenLight = light;
-        // }
-        // else
-        // {
-        //     mode = 1;
-        // }
-
         homeController->onScreenLeft();
         break;
     };
     case SAVE_SLOT_PAGE:
     {
-        // TODO: Handle overflow (more than 100)
-        // save this
-        // groups[groupIndex].slots[saveInSlotIndex].light = {
-        //     red
-        // }
-        // Serial.printf("Saved in group %d, slot %d\n", groupIndex, saveInSlotIndex);
-        // Serial.printf("Saved R %d, G %d, B %d\n", frozenLight.r, frozenLight.g, frozenLight.b);
-
-        // // changePage(HOME_PAGE);
-
-        // // case 1: isInsert = false, saveInSlotIndex = -1
-        // // => insert at the head of the list
-        // // case 2: isInsert = false, saveInSlotIndex = slotCount
-        // // => insert at the end of the list
-        // // case 3: isInsert = true, saveInSlotIndex = any except those 2
-        // // => insert inbetween
-        // if (isInsert == false && saveInSlotIndex == -1)
-        // {
-        //     // insert at the head of the list
-        //     for (int i = groups[groupIndex].slotCount; i > 0; i--)
-        //     {
-        //         groups[groupIndex].slots[i] = groups[groupIndex].slots[i - 1];
-        //     }
-        //     groups[groupIndex].slots[0].light = frozenLight;
-        //     groups[groupIndex].slotCount = groups[groupIndex].slotCount + 1;
-        //     slotIndex = 0; // show the newly inserted slot
-        // }
-        // else if (isInsert == false && saveInSlotIndex == groups[groupIndex].slotCount)
-        // {
-        //     // insert at the end of the list
-        //     groups[groupIndex].slots[groups[groupIndex].slotCount].light = frozenLight;
-        //     groups[groupIndex].slotCount = groups[groupIndex].slotCount + 1;
-        //     slotIndex = groups[groupIndex].slotCount - 1; // show the newly inserted slot
-        // }
-        // else
-        // {
-        //     // insert inbetween
-        //     for (int i = groups[groupIndex].slotCount; i > saveInSlotIndex; i--)
-        //     {
-        //         groups[groupIndex].slots[i] = groups[groupIndex].slots[i - 1];
-        //     }
-        //     groups[groupIndex].slots[saveInSlotIndex].light = frozenLight;
-        //     groups[groupIndex].slotCount = groups[groupIndex].slotCount + 1;
-        //     slotIndex = saveInSlotIndex; // show the newly inserted slot
-        // }
-
-        // save("Saving slot...");
         saveSlotController->onScreenLeft();
         break;
     }
@@ -338,80 +224,17 @@ void Controller::onScreenLeft()
     case SETTINGS_PAGE:
     {
 
-        // if (settingsIndex == 0)
-        // {
-        //     // delete item
-        //     deleteIndex = slotIndex;
-        //     // changePage(DELETE_SLOT_PAGE);
-        // }
-        // if (settingsIndex == 1)
-        // {
-        //     // change group
-        //     groupSelectionIndex = groupIndex;
-        //     // changePage(CHANGE_GROUP_PAGE);
-        // }
-        // if (settingsIndex == 2)
-        // {
-        //     // Scan for receivers
-        //     // unimplemented
-        // }
         settingsController->onScreenLeft();
         break;
     };
     case DELETE_SLOT_PAGE:
     {
-        // delete the slot
-        // for (int i = deleteIndex; i < groups[groupIndex].slotCount - 1; i++)
-        // {
-        //     groups[groupIndex].slots[i] = groups[groupIndex].slots[i + 1];
-        // }
-        // groups[groupIndex].slotCount = groups[groupIndex].slotCount - 1;
-
-        // // // changePage(HOME_PAGE);
-        // if (groups[groupIndex].slotCount == 0)
-        // {
-        //     // changePage(HOME_PAGE);
-        // }
-        // if (deleteIndex == groups[groupIndex].slotCount)
-        // {
-        //     deleteIndex--;
-        // }
-        // if (slotIndex == groups[groupIndex].slotCount)
-        // {
-        //     slotIndex--;
-        // }
-        // save("Deleting slot...");
-
         deleteSlotController->onScreenLeft();
         break;
     }
 
     case CHANGE_GROUP_PAGE:
     {
-        // todo: handle overwrite
-        // todo: cleaner way to initialize the new group name
-        // what if we exit the page and should we keep the new group name when we come bac
-
-        // initialize new group name to empty
-        // if (isInsertGroup)
-        // {
-
-        //     // changePage(CHARACTER_INPUT_PAGE);
-        // }
-        // else
-        // {
-        //     if (groupSelectionIndex != -1 && groupSelectionIndex != groupCount)
-        //     {
-        //         // LOAD
-        //         groupIndex = groupSelectionIndex;
-        //         // changePage(HOME_PAGE);
-        //     }
-        //     else
-        //     {
-        //         // SAVE
-        //         // changePage(CHARACTER_INPUT_PAGE);
-        //     }
-        // }
         changeGroupController->onScreenLeft();
         break;
     }
@@ -431,16 +254,6 @@ void Controller::onScreenRight()
     {
     case HOME_PAGE:
     {
-        // exit saving mode
-        // if (mode == 1)
-        // {
-        //     // exit saving mode
-        //     mode = 0;
-        // }
-        // else
-        // {
-        //     // changePage(SETTINGS_PAGE);
-        // }
 
         homeController->onScreenRight();
         break;
@@ -448,27 +261,26 @@ void Controller::onScreenRight()
 
     case SAVE_SLOT_PAGE:
     {
-        // CANCEL SAVING
-        // changePage(HOME_PAGE);
+
         saveSlotController->onScreenRight();
         break;
     }
 
     case SETTINGS_PAGE:
     {
-        // changePage(HOME_PAGE);
+
         settingsController->onScreenRight();
         break;
     }
     case DELETE_SLOT_PAGE:
     {
-        // changePage(SETTINGS_PAGE);
+
         deleteSlotController->onScreenRight();
         break;
     }
     case CHANGE_GROUP_PAGE:
     {
-        // changePage(SETTINGS_PAGE);
+
         changeGroupController->onScreenRight();
         break;
     }
@@ -507,44 +319,12 @@ void Controller::onDown()
     {
     case HOME_PAGE:
     {
-        // if (mode == 1)
-        //     return;
-        // if (groups[groupIndex].slotCount == 0)
-        //     return;
-        // slotIndex = (slotIndex + 1) % groups[groupIndex].slotCount;
+
         homeController->onDown();
         break;
     }
     case SAVE_SLOT_PAGE:
     {
-        // // no looping
-        // if (saveInSlotIndex == groups[groupIndex].slotCount)
-        // {
-        // }
-        // else
-        // {
-        //     if (saveInSlotIndex == -1 || saveInSlotIndex == 0)
-        //     {
-        //         saveInSlotIndex++;
-        //         isInsert = false;
-        //     }
-        //     else if (saveInSlotIndex == groups[groupIndex].slotCount - 1)
-        //     {
-        //         saveInSlotIndex++;
-        //         isInsert = false;
-        //     }
-        //     else if (!isInsert)
-        //     {
-        //         isInsert = true;
-        //         saveInSlotIndex++;
-        //     }
-        //     else
-        //     {
-        //         isInsert = false;
-        //     }
-        // }
-
-        // Serial.printf("Now looking at slot %d\n", saveInSlotIndex);
 
         saveSlotController->onDown();
 
@@ -558,7 +338,6 @@ void Controller::onDown()
     };
     case DELETE_SLOT_PAGE:
     {
-        // deleteIndex = (deleteIndex + 1) % groups[groupIndex].slotCount;
         deleteSlotController->onDown();
         break;
     }
@@ -584,40 +363,12 @@ void Controller::onUp()
     {
     case HOME_PAGE:
     {
-        // if (mode == 1)
-        //     return;
 
-        // if (groups[groupIndex].slotCount == 0)
-        //     return;
-        // slotIndex = (slotIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
         homeController->onUp();
         break;
     }
     case SAVE_SLOT_PAGE:
     {
-
-        // if (saveInSlotIndex == -1)
-        // {
-        // }
-        // else
-        // {
-        //     if (saveInSlotIndex == groups[groupIndex].slotCount || saveInSlotIndex == 0)
-        //     {
-        //         saveInSlotIndex--;
-        //         isInsert = false;
-        //     }
-        //     else if (!isInsert)
-        //     {
-        //         isInsert = true;
-        //     }
-        //     else
-        //     {
-        //         isInsert = false;
-
-        //         saveInSlotIndex--;
-        //     }
-        // }
-        // Serial.printf("Now looking at slot %d\n", saveInSlotIndex);
 
         saveSlotController->onUp();
         break;
@@ -625,13 +376,11 @@ void Controller::onUp()
     case SETTINGS_PAGE:
     {
 
-        // settingsIndex = (settingsIndex - 1 + SETTINGS_COUNT) % SETTINGS_COUNT;
         settingsController->onUp();
         break;
     }
     case DELETE_SLOT_PAGE:
     {
-        // deleteIndex = (deleteIndex - 1 + groups[groupIndex].slotCount) % groups[groupIndex].slotCount;
         deleteSlotController->onUp();
         break;
     }
