@@ -17,6 +17,7 @@
 // #include "display/MenuScreen.cpp"
 #include "display/BaseDisplay.h"
 #include "controller/Controller.h"
+// #include "server/ServerController.h"
 
 #define REFORMAT true
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -61,39 +62,6 @@ IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 
 AsyncWebServer server(80);
-
-const char index_html[] PROGMEM = R"rawliteral(
-    <!DOCTYPE HTML><html>
-    <head>
-      <title>ESP Web Server</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="icon" href="data:,">
-      <style>
-        html {font-family: Arial; display: inline-block; text-align: center;}
-        h2 {font-size: 3.0rem;}
-        p {font-size: 3.0rem;}
-        body {max-width: 600px; margin:0px auto; padding-bottom: 25px;}
-        .switch {position: relative; display: inline-block; width: 120px; height: 68px} 
-        .switch input {display: none}
-        .slider {position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 6px}
-        .slider:before {position: absolute; content: ""; height: 52px; width: 52px; left: 8px; bottom: 8px; background-color: #fff; -webkit-transition: .4s; transition: .4s; border-radius: 3px}
-        input:checked+.slider {background-color: #b30000}
-        input:checked+.slider:before {-webkit-transform: translateX(52px); -ms-transform: translateX(52px); transform: translateX(52px)}
-      </style>
-    </head>
-    <body>
-      <h2>ESP Web Server</h2>
-      %BUTTONPLACEHOLDER%
-    <script>function toggleCheckbox(element) {
-      var xhr = new XMLHttpRequest();
-      if(element.checked){ xhr.open("GET", "/update?output="+element.id+"&state=1", true); }
-      else { xhr.open("GET", "/update?output="+element.id+"&state=0", true); }
-      xhr.send();
-    }
-    </script>
-    </body>
-    </html>
-    )rawliteral";
 
 void readMacAddress()
 {
@@ -167,6 +135,7 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 // MenuScreen* menuScreen;
 BaseDisplay baseDisplay;
 Controller controller(&baseDisplay);
+// ServerController serverController(controller);
 
 void setup()
 {
@@ -263,9 +232,49 @@ void setup()
 
     // Route for root / web page
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send_P(200, "text/html", index_html); });
+              { request->send_P(200, "text/plain", "hello-world"); });
+
+    server.on("/groups", HTTP_GET, [](AsyncWebServerRequest *request)
+              {
+        String path = request->url(); // Get full URL
+        Serial.println("Full URL: " + path);
+
+        int groupCount = 0;
+        Group *groups = controller.getGroups(&groupCount);
+
+        if (path == "/groups")
+        {
+            String json = Controller::groupOptionsToJson(groups, groupCount);
+
+            request->send(200, "application/json", json);
+            return;
+        }
+
+        if (path.startsWith("/groups/"))
+        {
+            String idStr = path.substring(8); // Get substring after "/groups/"
+            int groupId = idStr.toInt();      // Convert to integer
+
+            Serial.printf("Requested Group ID: %d\n", groupId);
+            if (groupId >= 0 && groupId < 20)
+            { // Ensure ID is valid
+
+                String json = Controller::groupToJson(&groups[groupId]);
+                request->send(200, "application/json", json);
+            }
+            else
+            {
+                request->send(404, "application/json", "{\"error\": \"Invalid Group ID\"}");
+            }
+        }
+        else
+        {
+            request->send(400, "application/json", "{\"error\": \"Invalid request\"}");
+        } });
 
     server.begin();
+
+    // serverController.registerServer();
     Serial.println("Ended");
     // controller.refreshPage(&display);
 }
@@ -288,7 +297,6 @@ change_message randomCase;
 
 void loop()
 {
-
     controller.refreshPage(&display);
     delay(30); // ~30fps
 
