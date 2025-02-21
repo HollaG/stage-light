@@ -10,6 +10,8 @@
 #include "subcontrollers/ChangeGroup/ChangeGroupController.h"
 #include "subcontrollers/CharacterInput/CharacterInputController.h"
 
+#include "server/ServerController.h"
+
 Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
 {
 
@@ -56,6 +58,11 @@ Controller::Controller(BaseDisplay *baseDisplay) : baseDisplay(baseDisplay)
     characterInputController = new CharacterInputController(baseDisplay, this);
 
     load();
+}
+
+void Controller::linkToServer(ServerController *serverController)
+{
+    this->serverController = serverController;
 }
 
 void Controller::updateLight(int red, int green, int blue)

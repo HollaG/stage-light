@@ -20,6 +20,8 @@ class DeleteSlotController;
 class ChangeGroupController;
 class CharacterInputController;
 
+class ServerController; // forward declaration
+
 class Controller
 {
     Preferences prefs;
@@ -34,6 +36,8 @@ class Controller
     DeleteSlotController *deleteSlotController;
     ChangeGroupController *changeGroupController;
     CharacterInputController *characterInputController;
+
+    ServerController *serverController;
 
     // ------ HOME PAGE
     Light light = {0, 0, 0, 0, 0, 0}; // light used in EDITING
@@ -93,6 +97,9 @@ public:
     int groupCount = 0;
 
     Controller(BaseDisplay *baseDisplay);
+
+    void linkToServer(ServerController *serverController);
+
     void refreshPage(Adafruit_SSD1306 *display);
 
     void updateLight(int red, int green, int blue);
