@@ -17,7 +17,7 @@
 // #include "display/MenuScreen.cpp"
 #include "display/BaseDisplay.h"
 #include "controller/Controller.h"
-// #include "server/ServerController.h"
+#include "server/ServerController.h"
 
 #define REFORMAT true
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -137,6 +137,8 @@ BaseDisplay baseDisplay;
 Controller controller(&baseDisplay);
 // ServerController serverController(controller);
 
+ServerController serverController;
+
 void setup()
 {
     if (!LittleFS.begin(true))
@@ -149,8 +151,6 @@ void setup()
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
-        // NVS partition was truncated and needs to be erased
-        // Retry nvs_flash_init
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
     }
@@ -168,28 +168,19 @@ void setup()
     Serial.begin(115200);
 
     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
-    { // Address 0x3D for 128x64
+    {
         Serial.println(F("SSD1306 allocation failed"));
         for (;;)
             ;
     }
 
     display.clearDisplay();
-
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.setCursor(0, 10);
-    // Display static text
 
-    // wifi
+    // WiFi setup
     WiFi.mode(WIFI_AP_STA);
-    WiFi.channel(0);
-    // int32_t channel = getWiFiChannel(WIFI_SSID);
-    // WiFi.begin(ssid, password);
-    // esp_wifi_start();
-    // esp_wifi_set_channel(0, WIFI_SECOND_CHAN_NONE);
-    // esp_wifi_set_ps(WIFI_PS_NONE);
-
     WiFi.softAP(ssid, password, 0, 0, 4);
     WiFi.softAPConfig(local_ip, gateway, subnet);
 
@@ -206,14 +197,13 @@ void setup()
     memcpy(peerInfo.peer_addr, broadcastAddress1, 6);
     peerInfo.channel = 0;
     peerInfo.encrypt = false;
-    // Add peer
     if (esp_now_add_peer(&peerInfo) != ESP_OK)
     {
         Serial.println("Failed to add peer");
         return;
     }
 
-    // register peer2
+    // Register peer2
     memcpy(peerInfo.peer_addr, broadcastAddress2, 6);
     if (esp_now_add_peer(&peerInfo) != ESP_OK)
     {
@@ -221,63 +211,158 @@ void setup()
         return;
     }
 
-    // add indicator leds
+    // Add indicator LEDs
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
 
     controller.load();
 
-    // startup web server
-    // Print ESP Local IP Address
-    Serial.println(WiFi.softAPIP());
+    // Start the web server using the ServerController class
+    serverController.begin(&controller);
 
-    // Route for root / web page
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send_P(200, "text/plain", "hello-world"); });
-
-    server.on("/groups", HTTP_GET, [](AsyncWebServerRequest *request)
-              {
-        String path = request->url(); // Get full URL
-        Serial.println("Full URL: " + path);
-
-        int groupCount = 0;
-        Group *groups = controller.getGroups(&groupCount);
-
-        if (path == "/groups")
-        {
-            String json = Controller::groupOptionsToJson(groups, groupCount);
-
-            request->send(200, "application/json", json);
-            return;
-        }
-
-        if (path.startsWith("/groups/"))
-        {
-            String idStr = path.substring(8); // Get substring after "/groups/"
-            int groupId = idStr.toInt();      // Convert to integer
-
-            Serial.printf("Requested Group ID: %d\n", groupId);
-            if (groupId >= 0 && groupId < 20)
-            { // Ensure ID is valid
-
-                String json = Controller::groupToJson(&groups[groupId]);
-                request->send(200, "application/json", json);
-            }
-            else
-            {
-                request->send(404, "application/json", "{\"error\": \"Invalid Group ID\"}");
-            }
-        }
-        else
-        {
-            request->send(400, "application/json", "{\"error\": \"Invalid request\"}");
-        } });
-
-    server.begin();
-
-    // serverController.registerServer();
-    Serial.println("Ended");
-    // controller.refreshPage(&display);
+    Serial.println("Setup completed");
 }
+
+// void setup()
+// {
+//     if (!LittleFS.begin(true))
+//     {
+//         Serial.println("An Error has occurred while mounting LittleFS");
+//         return;
+//     }
+
+//     // NVS
+//     esp_err_t err = nvs_flash_init();
+//     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
+//     {
+//         // NVS partition was truncated and needs to be erased
+//         // Retry nvs_flash_init
+//         ESP_ERROR_CHECK(nvs_flash_erase());
+//         err = nvs_flash_init();
+//     }
+//     ESP_ERROR_CHECK(err);
+
+//     pinMode(BUTTON_DOWN_PIN, INPUT_PULLDOWN);
+//     pinMode(BUTTON_UP_PIN, INPUT_PULLDOWN);
+//     pinMode(BUTTON_SEND_PIN, INPUT_PULLDOWN);
+//     pinMode(BUTTON_SCREEN_LEFT_PIN, INPUT_PULLDOWN);
+//     pinMode(BUTTON_SCREEN_RIGHT_PIN, INPUT_PULLDOWN);
+//     pinMode(RED_POT, INPUT);
+//     pinMode(GREEN_POT, INPUT);
+//     pinMode(BLUE_POT, INPUT);
+
+//     Serial.begin(115200);
+
+//     if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+//     { // Address 0x3D for 128x64
+//         Serial.println(F("SSD1306 allocation failed"));
+//         for (;;)
+//             ;
+//     }
+
+//     display.clearDisplay();
+
+//     display.setTextSize(1);
+//     display.setTextColor(WHITE);
+//     display.setCursor(0, 10);
+//     // Display static text
+
+//     // wifi
+//     WiFi.mode(WIFI_AP_STA);
+//     WiFi.channel(0);
+//     // int32_t channel = getWiFiChannel(WIFI_SSID);
+//     // WiFi.begin(ssid, password);
+//     // esp_wifi_start();
+//     // esp_wifi_set_channel(0, WIFI_SECOND_CHAN_NONE);
+//     // esp_wifi_set_ps(WIFI_PS_NONE);
+
+//     WiFi.softAP(ssid, password, 0, 0, 4);
+//     WiFi.softAPConfig(local_ip, gateway, subnet);
+
+//     // Init ESP-NOW
+//     if (esp_now_init() != ESP_OK)
+//     {
+//         Serial.println("Error initializing ESP-NOW");
+//         return;
+//     }
+
+//     esp_now_register_send_cb(OnDataSent);
+
+//     // Register peer1
+//     memcpy(peerInfo.peer_addr, broadcastAddress1, 6);
+//     peerInfo.channel = 0;
+//     peerInfo.encrypt = false;
+//     // Add peer
+//     if (esp_now_add_peer(&peerInfo) != ESP_OK)
+//     {
+//         Serial.println("Failed to add peer");
+//         return;
+//     }
+
+//     // register peer2
+//     memcpy(peerInfo.peer_addr, broadcastAddress2, 6);
+//     if (esp_now_add_peer(&peerInfo) != ESP_OK)
+//     {
+//         Serial.println("Failed to add peer");
+//         return;
+//     }
+
+//     // add indicator leds
+//     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+
+//     controller.load();
+
+//     // startup web server
+//     // Print ESP Local IP Address
+//     Serial.println(WiFi.softAPIP());
+
+//     // Route for root / web page
+//     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+//               { request->send_P(200, "text/plain", "hello-world"); });
+
+//     server.on("/groups", HTTP_GET, [](AsyncWebServerRequest *request)
+//               {
+//         String path = request->url(); // Get full URL
+//         Serial.println("Full URL: " + path);
+
+//         int groupCount = 0;
+//         Group *groups = controller.getGroups(&groupCount);
+
+//         if (path == "/groups")
+//         {
+//             String json = Controller::groupOptionsToJson(groups, groupCount);
+
+//             request->send(200, "application/json", json);
+//             return;
+//         }
+
+//         if (path.startsWith("/groups/"))
+//         {
+//             String idStr = path.substring(8); // Get substring after "/groups/"
+//             int groupId = idStr.toInt();      // Convert to integer
+
+//             Serial.printf("Requested Group ID: %d\n", groupId);
+//             if (groupId >= 0 && groupId < 20)
+//             { // Ensure ID is valid
+
+//                 String json = Controller::groupToJson(&groups[groupId]);
+//                 request->send(200, "application/json", json);
+//             }
+//             else
+//             {
+//                 request->send(404, "application/json", "{\"error\": \"Invalid Group ID\"}");
+//             }
+//         }
+//         else
+//         {
+//             request->send(400, "application/json", "{\"error\": \"Invalid request\"}");
+//         } });
+
+//     server.begin();
+
+//     // serverController.registerServer();
+//     Serial.println("Ended");
+//     // controller.refreshPage(&display);
+// }
 
 int prevDownState = LOW;
 int prevUpState = LOW;

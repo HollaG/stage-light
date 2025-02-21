@@ -1,17 +1,17 @@
 #pragma once
 
-#include <AsyncTCP.h>
+#include <Arduino.h>
 #include <ESPAsyncWebServer.h>
 #include "controller/Controller.h"
 
 class ServerController
 {
 public:
-  ServerController(Controller &controller);
-
-  void registerServer();
+  ServerController();
+  void begin(Controller *controller);
+  void registerRoutes();
 
 private:
   AsyncWebServer server;
-  Controller controller;
+  Controller *controller;
 };
