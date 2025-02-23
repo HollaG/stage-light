@@ -4,7 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-    base: "/stage-light/SENDER/webserver",
+    base: "/stage-light/",
   plugins: [react(), tsconfigPaths(), VitePWA({
     registerType: 'autoUpdate', devOptions: {
       enabled: true,
