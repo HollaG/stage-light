@@ -20,6 +20,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
 
+      - name: List directories
+        run: ls -a
+
       - name: Install dependencies
         uses: bahmutov/npm-install@v1
 
