@@ -9,8 +9,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    
-
+    defaults:
+      run:
+        working-directory: SENDER/webserver
 
     steps:
       - name: Checkout repo
@@ -18,9 +19,6 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v3
-
-      - name: cd
-        run: cd SENDER/webserver
 
       - name: Install dependencies
         uses: bahmutov/npm-install@v1
@@ -39,6 +37,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/webserver'
+    defaults:
+      run:
+        working-directory: SENDER/webserver
 
     steps:
       - name: Download artifact
