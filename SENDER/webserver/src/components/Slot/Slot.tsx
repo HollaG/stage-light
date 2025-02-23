@@ -8,7 +8,7 @@ const SlotComponent = ({ slot }: {
 }) => {
 
     // TODO: put in context
-    const url = 'http://192.168.1.131';
+    const url = 'http://192.168.1.1';
 
     const onSelectSlot = () => {
         fetch(`${url}/slots?select=${slot.id}`)

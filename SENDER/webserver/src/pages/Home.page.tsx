@@ -9,7 +9,7 @@ import SlotComponent from '@/components/Slot/Slot';
 
 
 export function HomePage() {
-    const [serverIp, setServerIp] = useState<string>('http://192.168.1.131');
+    const [serverIp, setServerIp] = useState<string>('http://192.168.1.1');
     // const { data, loading, error, refetch, abort } = useFetch<Response<Partial<Group>[]>>(
     //     `${serverIp}/groups`
     // );

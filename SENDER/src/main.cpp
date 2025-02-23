@@ -54,10 +54,10 @@ uint8_t broadcastAddress2[] = {0x24, 0xd7, 0xeb, 0xee, 0xdc, 0x95}; // 24:d7:eb:
 #define DATA_PIN 33
 
 // Web Server for control
-// const char *ssid = "ESP-NOW";
-// const char *password = "";
-const char *ssid = "SohFamily";
-const char *password = "Soh14185";
+const char *ssid = "ESP-NOW";
+const char *password = "";
+// const char *ssid = "SohFamily";
+// const char *password = "Soh14185";
 /* Put IP Address details */
 IPAddress local_ip(192, 168, 1, 1);
 IPAddress gateway(192, 168, 1, 1);
@@ -183,23 +183,23 @@ void setup()
 
     // --------------------------
     // WiFi setup (AP mode)
-    // WiFi.mode(WIFI_AP_STA);
-    // WiFi.softAP(ssid, password, 0, 0, 4);
-    // WiFi.softAPConfig(local_ip, gateway, subnet);
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP(ssid, password, 0, 0, 4);
+    WiFi.softAPConfig(local_ip, gateway, subnet);
 
     // WiFi setup (STA mode)
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
+    // WiFi.mode(WIFI_STA);
+    // WiFi.begin(ssid, password);
 
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print(".");
-        delay(100);
-    }
+    // while (WiFi.status() != WL_CONNECTED)
+    // {
+    //     Serial.print(".");
+    //     delay(100);
+    // }
 
-    Serial.println("\nConnected to the WiFi network");
-    Serial.print("Local ESP32 IP: ");
-    Serial.println(WiFi.localIP());
+    // Serial.println("\nConnected to the WiFi network");
+    // Serial.print("Local ESP32 IP: ");
+    // Serial.println(WiFi.localIP());
     // --------------------------
 
     // Init ESP-NOW
