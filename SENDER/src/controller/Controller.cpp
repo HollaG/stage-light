@@ -411,6 +411,11 @@ void Controller::onUp()
 void Controller::changeGroup(int groupIndex)
 {
     this->groupIndex = groupIndex;
+    this->slotIndex = 0;
+}
+
+void Controller::changeSlot(int slotIndex) { 
+    this->slotIndex = slotIndex;
 }
 
 void Controller::save(std::string message = "Saving slot...")
@@ -609,13 +614,19 @@ String Controller::groupToJson(Group *group)
     {
         JsonObject slotObj = slotsArray.add<JsonObject>();
         slotObj["id"] = i; // Index as ID
-        slotObj["r"] = group->slots[i].light.r;
-        slotObj["g"] = group->slots[i].light.g;
-        slotObj["b"] = group->slots[i].light.b;
-        slotObj["w"] = group->slots[i].light.w;
-        slotObj["ww"] = group->slots[i].light.ww;
-        slotObj["light__type"] = group->slots[i].light.light__type;
-        slotObj["light__transition"] = group->slots[i].light.light__transition;
+
+        JsonObject light = slotObj["light"].to<JsonObject>();
+        
+        // add a key "light" and set the light to be the property
+        
+
+        light["r"] = group->slots[i].light.r;
+        light["g"] = group->slots[i].light.g;
+        light["b"] = group->slots[i].light.b;
+        light["w"] = group->slots[i].light.w;
+        light["ww"] = group->slots[i].light.ww;
+        light["light__type"] = group->slots[i].light.light__type;
+        light["light__transition"] = group->slots[i].light.light__transition;
     }
 
     String jsonString;

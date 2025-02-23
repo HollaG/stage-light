@@ -34,7 +34,7 @@ struct Group
 {
     Slot slots[100];
     // bool slotExists[100] = {false};
-    char name[GROUP_NAME_LENGTH];
+    char name[GROUP_NAME_LENGTH + 1]; // add null-terminator at the end
     int slotCount;
 };
 

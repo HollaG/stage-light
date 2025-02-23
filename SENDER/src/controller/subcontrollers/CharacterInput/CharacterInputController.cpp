@@ -65,6 +65,7 @@ void CharacterInputController::onScreenLeft()
       {
         newGroup.name[i] = *POSSIBLE_CHARS[newGroupNameAsIndex[i]];
       }
+      newGroup.name[GROUP_NAME_LENGTH] = '\0';
       newGroup.slotCount = 0;
 
       Light light = {0, 0, 0};

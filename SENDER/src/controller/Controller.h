@@ -118,6 +118,7 @@ public:
     void load();
 
     void changeGroup(int groupIndex);
+    void changeSlot(int slotIndex);
 
     // for server
     Group *getGroups(int *groupCount);

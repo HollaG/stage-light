@@ -12,9 +12,5 @@ public:
         return "/";
     }
 
-    void GET(AsyncWebServerRequest *request)
-    {
-        request->send_P(200, "text/plain", "hello-world");
-    };
-    
+    void GET(AsyncWebServerRequest *request);
 };

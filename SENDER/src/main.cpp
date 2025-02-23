@@ -181,6 +181,7 @@ void setup()
     display.setTextColor(WHITE);
     display.setCursor(0, 10);
 
+    // --------------------------
     // WiFi setup (AP mode)
     // WiFi.mode(WIFI_AP_STA);
     // WiFi.softAP(ssid, password, 0, 0, 4);
@@ -190,7 +191,8 @@ void setup()
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
 
-    while(WiFi.status() != WL_CONNECTED){
+    while (WiFi.status() != WL_CONNECTED)
+    {
         Serial.print(".");
         delay(100);
     }
@@ -198,6 +200,7 @@ void setup()
     Serial.println("\nConnected to the WiFi network");
     Serial.print("Local ESP32 IP: ");
     Serial.println(WiFi.localIP());
+    // --------------------------
 
     // Init ESP-NOW
     if (esp_now_init() != ESP_OK)

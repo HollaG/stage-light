@@ -15,4 +15,5 @@ public:
 
     void GET_all(AsyncWebServerRequest *request);
     void GET_by_id(AsyncWebServerRequest *request);
+    void GET_change_group(AsyncWebServerRequest *request); // ?select={index}
 };

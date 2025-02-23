@@ -17,12 +17,16 @@ void ServerController::begin(Controller *controller)
 
 void ServerController::registerRoutes()
 {
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
 
     HomeRoute *home = new HomeRoute(this);
     GroupsRoute *groups = new GroupsRoute(this);
+    SlotsRoute *slots = new SlotsRoute(this);
 
     // array of routes
-    BaseRoute *routes[] = {home, groups};
+    BaseRoute *routes[] = {home, groups, slots};
 
     // for each route, register all verbs
     for (int i = 0; i < sizeof(routes) / sizeof(routes[0]); i++)

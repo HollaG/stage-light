@@ -59,6 +59,7 @@
     "thread": "cpp",
     "cinttypes": "cpp",
     "typeinfo": "cpp",
-    "any": "cpp"
-  }
+    "any": "cpp",
+    "complex": "cpp"
+}
 }

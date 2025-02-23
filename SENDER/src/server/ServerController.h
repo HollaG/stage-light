@@ -7,6 +7,7 @@
 
 #include "server/routes/index.h" // /
 #include "server/routes/groups/index.h" // /groups
+#include "server/routes/slots/index.h" // slots
 
 class ServerController
 {

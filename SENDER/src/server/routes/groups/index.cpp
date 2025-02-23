@@ -17,6 +17,19 @@ void GroupsRoute::GET(AsyncWebServerRequest *request)
     String path = request->url(); // Get full URL
     Serial.println("Full URL: " + path);
 
+    if (request->hasParam("select")) {
+        String groupId = request->getParam("select")->value();
+
+        // try to convert to integer
+        int groupIndex = groupId.toInt();
+
+        // TODO: data validation
+        this->serverController->controller->changeGroup(groupIndex);
+
+        // return 200
+        request->send(200, "application/json", "{\"message\": \"Group changed\"}");
+    }
+
     if (path == "/groups")
     {
         this->GET_all(request);
