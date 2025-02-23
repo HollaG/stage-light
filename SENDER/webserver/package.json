@@ -62,5 +62,6 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.2"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@4.6.0",
+  "homepage": "https://hollag.github.io/stage-light"
 }
