@@ -4,6 +4,10 @@
 #include <ESPAsyncWebServer.h>
 #include "controller/Controller.h"
 
+
+#include "server/routes/index.h" // /
+#include "server/routes/groups/index.h" // /groups
+
 class ServerController
 {
 public:
@@ -11,9 +15,10 @@ public:
   void begin(Controller *controller);
   void registerRoutes();
 
-private:
   AsyncWebServer server;
   Controller *controller;
+  
+private:
 
   // route registrtation callbacks
 
