@@ -40,9 +40,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/webserver'
-    defaults:
-      run:
-        working-directory: SENDER/webserver
 
     steps:
       - name: Download artifact
