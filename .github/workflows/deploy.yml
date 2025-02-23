@@ -16,17 +16,17 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v3
-      
-      - name: cd to webserver directory
-        run: cd SENDER/webserver
 
       - name: Install dependencies
+        working-directory: ./SENDER/webserver
         uses: bahmutov/npm-install@v1
 
       - name: Build project
+        working-directory: ./SENDER/webserver
         run: npm run build
 
       - name: Upload production-ready build files
+        working-directory: ./SENDER/webserver
         uses: actions/upload-artifact@v4
         with:
           name: production-files
