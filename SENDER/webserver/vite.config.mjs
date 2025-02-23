@@ -22,22 +22,22 @@ export default defineConfig(({ mode }) => ({
         theme_color: '#ffffff',
         icons: [
           {
-            src: '/pwa-64x64.png',
+            src: mode === 'development' ? '/pwa-64x64.png' : '/stage-light/pwa-64x64.png',
             sizes: '64x64',
             type: 'image/png',
           },
           {
-            src: '/pwa-192x192.png',
+            src: mode === 'development' ? '/pwa-192x192.png' : '/stage-light/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/pwa-512x512.png',
+            src: mode === 'development' ? '/pwa-512x512.png' : '/stage-light/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: '/maskable-icon-512x512.png',
+            src: mode === 'development' ? '/pwa-512x512.png' : '/stage-light/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
