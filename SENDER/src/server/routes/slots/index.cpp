@@ -1,7 +1,9 @@
 #include "index.h"
 
-void SlotsRoute::GET(AsyncWebServerRequest *request) {
-    if (request->hasParam("select")) { 
+void SlotsRoute::GET(AsyncWebServerRequest *request)
+{
+    if (request->hasParam("select"))
+    {
         String changeToSlotId = request->getParam("select")->value();
 
         // try to convert to integer
@@ -14,7 +16,5 @@ void SlotsRoute::GET(AsyncWebServerRequest *request) {
 
         // send back 200 OK
         request->send(200, "application/json", "{\"message\": \"Slot changed\"}");
-
-
     }
 }

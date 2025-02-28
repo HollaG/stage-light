@@ -55,7 +55,7 @@ uint8_t broadcastAddress2[] = {0x24, 0xd7, 0xeb, 0xee, 0xdc, 0x95}; // 24:d7:eb:
 
 // Web Server for control
 const char *ssid = "ESP-NOW";
-const char *password = "";
+const char *password = "esp32controller";
 // const char *ssid = "SohFamily";
 // const char *password = "Soh14185";
 /* Put IP Address details */
@@ -184,7 +184,7 @@ void setup()
     // --------------------------
     // WiFi setup (AP mode)
     WiFi.mode(WIFI_AP_STA);
-    WiFi.softAP(ssid, password, 0, 0, 4);
+    WiFi.softAP(ssid, password);
     WiFi.softAPConfig(local_ip, gateway, subnet);
 
     // WiFi setup (STA mode)

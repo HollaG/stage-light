@@ -1,7 +1,5 @@
 #include "index.h"
 
-
-
 GroupsRoute::GroupsRoute(ServerController *serverController)
     : BaseRoute(serverController)
 {
@@ -17,7 +15,11 @@ void GroupsRoute::GET(AsyncWebServerRequest *request)
     String path = request->url(); // Get full URL
     Serial.println("Full URL: " + path);
 
-    if (request->hasParam("select")) {
+    // strip the /api part
+    path = path.substring(4);
+
+    if (request->hasParam("select"))
+    {
         String groupId = request->getParam("select")->value();
 
         // try to convert to integer
@@ -46,7 +48,6 @@ void GroupsRoute::GET(AsyncWebServerRequest *request)
         request->send(400, "application/json", "{\"error\": \"Invalid request\"}");
     }
 }
-
 
 void GroupsRoute::GET_all(AsyncWebServerRequest *request)
 {

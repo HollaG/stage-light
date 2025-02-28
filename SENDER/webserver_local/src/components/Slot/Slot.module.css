@@ -1,0 +1,16 @@
+.container { 
+    padding: 1rem;
+    border: 1px solid black;
+    border-radius: 4px;
+
+    display: flex;
+    flex-direction: column;     
+
+
+    .lightColor { 
+        width: 16px;
+        height: 16px;
+        border-radius: 100%;
+    }
+}
+

@@ -9,7 +9,7 @@ public:
 
     std::string getRoute()
     {
-        return "/";
+        return "";
     }
 
     void GET(AsyncWebServerRequest *request);

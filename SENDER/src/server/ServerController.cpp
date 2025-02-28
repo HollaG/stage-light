@@ -1,4 +1,6 @@
 #include "ServerController.h"
+#include "static_files.h"
+#include <pgmspace.h>
 
 ServerController::ServerController() : server(80)
 {
@@ -31,54 +33,47 @@ void ServerController::registerRoutes()
     // for each route, register all verbs
     for (int i = 0; i < sizeof(routes) / sizeof(routes[0]); i++)
     {
-        server.on(routes[i]->getRoute().c_str(), HTTP_GET, [routes, i](AsyncWebServerRequest *request)
+        std::string route = routes[i]->getRoute(); // add /api in front
+        route = "/api" + route;
+
+        Serial.println(route.c_str());
+        server.on(route.c_str(), HTTP_GET, [routes, i](AsyncWebServerRequest *request)
                   { routes[i]->GET(request); });
 
-        server.on(routes[i]->getRoute().c_str(), HTTP_POST, [routes, i](AsyncWebServerRequest *request)
+        server.on(route.c_str(), HTTP_POST, [routes, i](AsyncWebServerRequest *request)
                   { routes[i]->POST(request); });
 
-        server.on(routes[i]->getRoute().c_str(), HTTP_PUT, [routes, i](AsyncWebServerRequest *request)
+        server.on(route.c_str(), HTTP_PUT, [routes, i](AsyncWebServerRequest *request)
                   { routes[i]->PUT(request); });
 
-        server.on(routes[i]->getRoute().c_str(), HTTP_DELETE, [routes, i](AsyncWebServerRequest *request)
+        server.on(route.c_str(), HTTP_DELETE, [routes, i](AsyncWebServerRequest *request)
                   { routes[i]->DELETE(request); });
     }
 
+    // Finally, create a route for each of the build artifacts.
+    // If you look in the static_files.h, at the bottom you will see the files[].
+    // In there, each file has a .path.
+    // This creates a route for each path, so if you have test.html, you would be able to access it at example.com/test
+    // Or if you have test.png, you would be able to access it at example.com/test.png
+    for (int i = 0; i < static_files::num_of_files; i++)
+    {
+        server.on(static_files::files[i].path, [i](AsyncWebServerRequest *request)
+                  {
+                      AsyncWebServerResponse *response = request->beginResponse(static_files::files[i].type, static_files::files[i].size, [i](uint8_t *buffer, size_t maxLen, size_t index) -> size_t
+                                                                                {
+                        size_t toRead = maxLen;
+                        if (index + toRead > static_files::files[i].size) {
+                            toRead = static_files::files[i].size - index;
+                        }
+                        memcpy_P(buffer, static_files::files[i].contents + index, toRead);
+                        return toRead; });
+                      response->addHeader("Content-Encoding", "gzip");
+                      request->send(response); });
+    }
 
-    // server.on("/groups", HTTP_GET, [this](AsyncWebServerRequest *request)
-    //           {
-    //     String path = request->url(); // Get full URL
-    //     Serial.println("Full URL: " + path);
-
-    //     int groupCount = 0;
-    //     Group *groups = (this->controller)->getGroups(&groupCount);
-
-    //     if (path == "/groups")
-    //     {
-    //         String json = Controller::groupOptionsToJson(groups, groupCount);
-    //         request->send(200, "application/json", json);
-    //         return;
-    //     }
-
-    //     if (path.startsWith("/groups/"))
-    //     {
-    //         String idStr = path.substring(8); // Get substring after "/groups/"
-    //         int groupId = idStr.toInt();      // Convert to integer
-
-    //         Serial.printf("Requested Group ID: %d\n", groupId);
-    //         if (groupId >= 0 && groupId < 20)
-    //         {
-    //             String json = Controller::groupToJson(&groups[groupId]);
-    //             request->send(200, "application/json", json);
-    //         }
-    //         else
-    //         {
-    //             request->send(404, "application/json", "{\"error\": \"Invalid Group ID\"}");
-    //         }
-    //     }
-    //     else
-    //     {
-    //         request->send(400, "application/json", "{\"error\": \"Invalid request\"}");
-    //     }
-    //  });
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+              {
+        AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", static_files::f_index_html_contents, static_files::f_index_html_size);
+        response->addHeader("Content-Encoding", "gzip");  // Set gzip encoding header
+        request->send(response); });
 };
