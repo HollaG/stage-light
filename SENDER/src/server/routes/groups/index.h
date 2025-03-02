@@ -11,6 +11,7 @@ public:
 
     virtual std::string getRoute() override;
     virtual void GET(AsyncWebServerRequest *request) override;
+    virtual void POST(AsyncWebServerRequest *request) override;
 
 
     void GET_all(AsyncWebServerRequest *request);

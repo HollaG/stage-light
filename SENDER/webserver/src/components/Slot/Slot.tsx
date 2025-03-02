@@ -11,9 +11,9 @@ const SlotComponent = ({ slot }: {
     const url = 'http://192.168.1.1';
 
     const onSelectSlot = () => {
-        fetch(`${url}/slots?select=${slot.id}`)
-            .then(response => response.json())
-            .then(console.log)
+        // fetch(`${url}/slots?select=${slot.id}`)
+        //     .then(response => response.json())
+        //     .then(console.log)
     }
 
     return <Box className={classes.container} onClick={onSelectSlot}>

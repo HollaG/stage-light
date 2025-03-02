@@ -78,3 +78,19 @@ void GroupsRoute::GET_by_id(AsyncWebServerRequest *request)
     String json = Controller::groupToJson(&groups[id]);
     request->send(200, "application/json", json);
 }
+
+/**
+ * Body:
+ * {
+ * "name": "Group name",
+ * id: number // the index at which to insert the group. 
+ * TODO: do a system where we can insert inbetween. Currently, we just override the group at the index.
+ * }
+ */
+void GroupsRoute::POST(AsyncWebServerRequest *request)
+{
+    String path = request->url(); // Get full URL
+    Serial.println("Full URL: " + path);
+
+    // get the name and id from the bpost request body
+}

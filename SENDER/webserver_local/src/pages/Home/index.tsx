@@ -38,126 +38,178 @@
 // 	);
 // }
 
-import { useState } from 'react';
+import { TargetedEvent, useEffect, useState } from 'react';
 import { CGroup, Response, Slot } from '../../types/types';
 import SlotComponent from '../../components/Slot/Slot';
+import { useUrl } from '../../context/UrlContext';
 
 
 
 export function HomePage() {
-	const [serverIp, setServerIp] = useState<string>('http://192.168.1.1/api');
-	// const { data, loading, error, refetch, abort } = useFetch<Response<Partial<Group>[]>>(
-	//     `${serverIp}/groups`
-	// );
+    // const [serverIp, setServerIp] = useState<string>('http://localhost:3000/api');
+    const { serverIp, setServerIp } = useUrl()
+    const [groupData, setGroupData] = useState<Response<Partial<CGroup>[]>>({ data: [] });
+    const [webState, setWebState] = useState<{
+        groupIndex: number,
+        slotIndex: number
+    }>({
+        groupIndex: -1,
+        slotIndex: -1
+    })
 
-	const [groupData, setGroupData] = useState<Response<Partial<CGroup>[]>>({ data: [] });
-	const [controllerState, setControllerState] = useState<{
-		groupIndex: number,
-		slotIndex: number
-	}>({
-		groupIndex: -1,
-		slotIndex: -1
-	})
+    const [activeGroup, setActiveGroup] = useState<CGroup>();
 
-	const [activeGroup, setActiveGroup] = useState<CGroup>();
+    // on launch, fetch the groups, THEN the state
+    const getGroups = async () => {
+        return fetch(`${serverIp}/groups`)
+            .then((response) => response.json())
+            .then((data) => {
+                // console.log(data);
+                setGroupData(data);
+            })
 
+    }
 
-	const groupsValue: {
-		value: string;
-		label: string;
-	}[] = groupData?.data.map((group) => ({
-		value: group.id?.toString() || "",
-		label: group.name || 'Unknown',
-	})) || [];
+    /**
+     * Get the state of the controller.
+     * @returns 
+     */
+    const getControllerState = async () => {
+        const res1 = await fetch(`${serverIp}`);
+        const data1 = await res1.json() as { 
+            groupIndex: number, 
+            slotIndex: number
+        };
+        
 
+        return data1;
+    }
 
+    const getState = async () => {
+        const res1 = await fetch(`${serverIp}`);
+        const data1 = await res1.json();
+        setWebState({
+            groupIndex: data1.groupIndex,
+            slotIndex: data1.slotIndex
+        })
 
-	const onIpUpdate = (evt: React.ChangeEvent<HTMLInputElement>) => {
-		setServerIp(evt.currentTarget.value);
-		wrapper()
-	}
-
-	const wrapper = async () => {
-		getGroups().then(() => getState());
-	}
-
-	const getGroups = async () => {
-		return fetch(`${serverIp}/groups`)
-			.then((response) => response.json())
-			.then((data) => {
-				// console.log(data);
-				setGroupData(data);
-			})
-
-	}
-
-	const getState = async () => {
-		const res1 = await fetch(`${serverIp}`);
-		const data1 = await res1.json();
-		// console.log({ state: data1 });
-		setControllerState({
-			groupIndex: data1.groupIndex,
-			slotIndex: data1.slotIndex
-		})
-
-		const res2 = await fetch(`${serverIp}/groups/${data1.groupIndex}`);
-		const data2 = await res2.json();
-
-		// console.log({ group: data2 });
-
-		setActiveGroup(data2.data);
+        return data1;
+    }
 
 
-	}
+    const getData = () => {
+        getGroups().then(() => getState());
+    }
 
-	const onChangeGroup = (groupId: string) => { // groupId is just the index
-		fetch(`${serverIp}/groups?select=${groupId}`)
-			.then(res => res.json())
-			.then((data) => {
-				// TODO: handle error
-				getState();
-			})
-	}
+    useEffect(() => {
+        getGroups().then(() => changeGroup(0)) // always set to default
+    }, [])
 
-	console.log({ activeGroup })
+    console.log({ controllerState: webState })
 
-	// console.log({ groupsValue });
-	return (
-		<div style={{ padding: "4rem" }}>
-			<div>
-				<div>
+    // every time the group changes, we need to fetch the DATA only of the new group
+    // useEffect(() => {
+    //     fetch(`${serverIp}/groups/${webState.groupIndex}`)
+    //         .then(res => res.json())
+    //         .then((data) => {
+    //             console.log({ group: data });
+    //             // setActiveGroup(data.data);
+    //         })
+    // }, [webState.groupIndex])
 
-					<input
-						// label="Server IP"
-						// description="ESP Host IP"
-						placeholder="192.168.x.x"
-						value={serverIp}
-						onChange={onIpUpdate}
-					/>
-					<button onClick={() => wrapper()} >
-						Refresh
-					</button>
-				</div>
-				<div>
+    const onGroupChange = (e: TargetedEvent<HTMLSelectElement, Event>) => {
+        // setControllerState({
+        //     ...controllerState,
+        //     groupIndex: index
+        // })
+        const index = (e.currentTarget.value);
+        console.log({ index })
 
-					<select
-						// label="Active group"
-						value={controllerState.groupIndex !== undefined ? controllerState.groupIndex.toString() : ""}
-						// data={groupsValue}
-						onChange={(groupId) => {
-							// setControllerState({
-							//     groupIndex: parseInt(value),
-							//     slotIndex: controllerState.slotIndex
-							// })
-							// onChangeGroup(groupId!)
-						}}
-					/>
-				</div>
+        changeGroup(index);
 
-				<div>
-					{activeGroup ? activeGroup.slots.map((slot, index) => <SlotComponent slot={slot} key={index} />) : "No slots saved yet!"}
-				</div>
-			</div>
-		</div>
-	);
+    }
+
+    const changeGroup = (index: any) => {
+        fetch(`${serverIp}/groups/${index}`)
+            .then(res => res.json())
+            .then((data) => {
+                console.log({ group: data });
+                setActiveGroup(data.data);
+
+                setWebState({
+                    ...webState,
+                    groupIndex: parseInt(index)
+                })
+            })
+    }
+
+    const sendGroupChange = () => {
+        // send the group change to the controller
+        fetch(`${serverIp}/groups?select=${webState.groupIndex}`)
+            .then(res => res.json())
+            .then((data) => {
+                // console.log({ group: data });
+                // setActiveGroup(data.data);
+                // TODO: error handling
+            })
+    }
+
+    const syncHandler = () => {
+        getControllerState().then((data) => changeGroup(data.groupIndex))
+    }
+
+
+
+
+    const groupsValue: {
+        value: string;
+        label: string;
+    }[] = groupData?.data.map((group) => ({
+        value: group.id?.toString() || "",
+        label: group.name || 'Unknown',
+    })) || [];
+
+
+
+    return (
+        <div style={{ padding: "4rem" }}>
+            <div>
+                <div>
+
+                    <input
+                        // label="Server IP"
+                        // description="ESP Host IP"
+                        placeholder="192.168.x.x"
+                        value={serverIp}
+                    // onChange={onIpUpdate}
+                    />
+                    <button onClick={() => {
+                        // wrapper() 
+                    }} >
+                        Refresh me
+                    </button>
+                </div>
+                <div>
+
+                    <select
+                        // label="Active group"
+                        value={webState.groupIndex}
+                        // data={groupsValue}
+                        onChange={onGroupChange}
+                    >
+                        {groupsValue.map((group, index) => <option value={group.value} key={index}>{group.label}</option>)}
+
+                    </select>
+                    <button onClick={sendGroupChange}>
+                        Send to controller
+                    </button>
+                    <button onClick={syncHandler}> Sync </button>
+                </div>
+
+                <div>
+                    {activeGroup ? activeGroup.slots.map((slot, index) => <SlotComponent slot={slot} key={index} />) : "No slots saved yet!"}
+                </div>
+            </div>
+        </div>
+    );
 }
