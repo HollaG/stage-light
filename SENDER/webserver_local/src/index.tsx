@@ -4,6 +4,7 @@ import { LocationProvider, Router, Route } from 'preact-iso';
 import { Header } from './components/Header.jsx';
 import { NotFound } from './pages/_404.jsx';
 import './style.css';
+// import './pico.min.css'
 import { HomePage } from './pages/Home/index.js';
 import UrlProvider, { UrlContext } from './context/UrlContext.js';
 
