@@ -205,7 +205,7 @@ Light Controller::getLight()
     // {
     //     return light;
     // }
-    return light;
+    return groups[groupIndex].slots[slotIndex].light;
 }
 
 // TODO: disable all buttons when saving
@@ -414,7 +414,8 @@ void Controller::changeGroup(int groupIndex)
     this->slotIndex = 0;
 }
 
-void Controller::changeSlot(int slotIndex) { 
+void Controller::changeSlot(int slotIndex)
+{
     this->slotIndex = slotIndex;
 }
 
@@ -568,6 +569,31 @@ Group *Controller::getGroup(int groupIndex)
     return &groups[groupIndex];
 }
 
+Slot *Controller::createSlot(Slot slot, int groupIndex, int slotIndex)
+{
+    Group *groups = this->groups;
+    groups[groupIndex].slots[groups[groupIndex].slotCount] = slot;
+    groups[groupIndex].slotCount = groups[groupIndex].slotCount + 1;
+
+    return &slot;
+}
+
+void Controller::deleteSlot(int groupIndex, int slotIndex)
+{
+    Group *groups = this->groups;
+    groups[groupIndex].slotCount = groups[groupIndex].slotCount - 1;
+
+    for (int i = slotIndex; i < groups[groupIndex].slotCount; i++)
+    {
+        groups[groupIndex].slots[i] = groups[groupIndex].slots[i + 1];
+    }
+
+    if (this->slotIndex >= groups[groupIndex].slotCount && groups[groupIndex].slotCount > 0)
+    {
+        this->slotIndex = groups[groupIndex].slotCount - 1;
+    }
+}
+
 Group *Controller::getCurrentGroup()
 {
     return &groups[groupIndex];
@@ -576,6 +602,12 @@ Group *Controller::getCurrentGroup()
 Slot *Controller::getCurrentSlot()
 {
     return &groups[groupIndex].slots[slotIndex];
+}
+
+void Controller::sendLight()
+{
+    Light light = this->getLight();
+    espNowConnection.send(&light);
 }
 
 /**
@@ -603,12 +635,13 @@ String Controller::groupOptionsToJson(Group *groups, int groupCount)
 /**
  * Given a slot id
  */
-String Controller::groupToJson(Group *group)
+String Controller::groupToJson(Group *group, int id)
 {
     int slotCount = group->slotCount;
     JsonDocument doc;
     doc["data"]["name"] = group->name;
     doc["data"]["slotCount"] = slotCount;
+    doc["data"]["id"] = id;
     JsonArray slotsArray = doc["data"]["slots"].to<JsonArray>();
     for (int i = 0; i < slotCount; i++)
     {
@@ -616,9 +649,8 @@ String Controller::groupToJson(Group *group)
         slotObj["id"] = i; // Index as ID
 
         JsonObject light = slotObj["light"].to<JsonObject>();
-        
+
         // add a key "light" and set the light to be the property
-        
 
         light["r"] = group->slots[i].light.r;
         light["g"] = group->slots[i].light.g;

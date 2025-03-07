@@ -13,8 +13,8 @@ export function App() {
         <UrlProvider>
 
             <LocationProvider>
-                <Header />
-                <main>
+                {/* <Header /> */}
+                <main class="container" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
                     <Router>
                         <Route path="/" component={HomePage} />
                         <Route default component={NotFound} />

@@ -1,3 +1,28 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ipInput,
+.groupSelect {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.labelText {
+  font-weight: bold;
+  margin: 0;
+  padding-left: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.addNew {
+  display: flex;
+  /* align-items: center; */
+  flex-direction: column;
+}
 /* img {
 	margin-bottom: 1.5rem;
 }

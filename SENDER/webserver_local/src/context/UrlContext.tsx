@@ -5,13 +5,13 @@ export const UrlContext = createContext<{
     serverIp: string,
     setServerIp: (url: string) => void
 }>({
-    serverIp: 'http://localhost:3000/api',
+    serverIp: 'http://192.168.1.1/api',
     setServerIp: () => { }
 });
 
 const UrlProvider = ({ children }: { children: any }) => {
 
-    const [url, setUrl] = useState<string>('http://localhost:3000/api');
+    const [url, setUrl] = useState<string>('http://192.168.1.1/api');
 
     return <UrlContext.Provider value={{ serverIp: url, setServerIp: setUrl }}>
         {children}

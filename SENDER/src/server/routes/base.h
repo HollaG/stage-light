@@ -15,22 +15,21 @@ public:
         this->serverController = serverController;
     }
 
-
     virtual std::string getRoute();
 
     virtual void GET(AsyncWebServerRequest *request)
     {
         request->send(404, "text/plain", "Not Found !!");
     };
-    virtual void POST(AsyncWebServerRequest *request)
+    virtual void POST(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
     {
         request->send(404, "text/plain", "Not Found !!");
     };
-    virtual void PUT(AsyncWebServerRequest *request)
+    virtual void PUT(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
     {
         request->send(404, "text/plain", "Not Found !!");
     };
-    virtual void DELETE(AsyncWebServerRequest *request)
+    virtual void DELETE(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
     {
         request->send(404, "text/plain", "Not Found !!");
     };

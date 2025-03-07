@@ -69,10 +69,10 @@ void EspNowConnection::OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
-esp_err_t EspNowConnection::send(CHANGE_MESSAGE *change)
+esp_err_t EspNowConnection::send(Light *change)
 {
   Serial.printf("[EspNowConnection] Sending message: R %d, G %d, B %d\n", change->r, change->g, change->b);
-  esp_err_t result = esp_now_send(0, (uint8_t *)&change, sizeof(CHANGE_MESSAGE));
+  esp_err_t result = esp_now_send(0, (uint8_t *)&change, sizeof(change));
 
   if (result == ESP_OK)
   {

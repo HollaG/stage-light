@@ -12,9 +12,8 @@ public:
         return "/slots";
     }
 
-    void GET(AsyncWebServerRequest *request); // select a specific slot (in query params)
-    // void POST(AsyncWebServerRequest *request); // create a specific slot
+    void GET(AsyncWebServerRequest *request);                                                         // select a specific slot (in query params)
+    void POST(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total); // create a specific slot
     // void PUT(AsyncWebServerRequest *request);  // update a specific slot
-    // void DELETE(AsyncWebServerRequest *request); // delete a specific slot
-
+    void DELETE(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total); // delete a specific slot
 };

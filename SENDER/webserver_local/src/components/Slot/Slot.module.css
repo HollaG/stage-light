@@ -1,16 +1,33 @@
-.container { 
-    padding: 1rem;
-    border: 1px solid black;
-    border-radius: 4px;
+.slotContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
 
-    display: flex;
-    flex-direction: column;     
+  padding: 1rem;
+  p {
+    margin: 0;
+  }
 
+  cursor: pointer;
 
-    .lightColor { 
-        width: 16px;
-        height: 16px;
-        border-radius: 100%;
-    }
+  border: 1px solid transparent;
 }
 
+.hideShadow {
+  box-shadow: none;
+}
+
+.lightColor {
+  width: 16px;
+  height: 16px;
+  border-radius: 100%;
+}
+
+.deleteSlotBtn {
+  transform: "scale(0.7)";
+}
+
+.outlined {
+  border: 1px solid var(--pico-primary-background);
+}

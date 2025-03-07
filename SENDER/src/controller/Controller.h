@@ -90,10 +90,10 @@ class Controller
     int cursorPosition = 0;
 
 public:
-    Group groups[20];
+    Group groups[20]; // all groups
     bool groupExists[20] = {false};
-    int groupIndex = 0;
-    int slotIndex = 0;
+    int groupIndex = 0; // current active group
+    int slotIndex = 0;  // current active slot
     int groupCount = 0;
 
     Controller(BaseDisplay *baseDisplay);
@@ -126,8 +126,15 @@ public:
     Group *getCurrentGroup();
     Slot *getCurrentSlot();
 
+    // save slots
+    Slot *createSlot(Slot slot, int groupIndex, int slotIndex);
+    void deleteSlot(int groupIndex, int slotIndex);
+
+    // send to esp
+    void sendLight();
+
     static String groupOptionsToJson(Group *groups, int groupCount);
-    static String groupToJson(Group *group);
+    static String groupToJson(Group *group, int id);
 
     // Getters and Setters
     // int getEditMode();

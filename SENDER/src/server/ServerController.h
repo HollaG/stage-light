@@ -4,10 +4,9 @@
 #include <ESPAsyncWebServer.h>
 #include "controller/Controller.h"
 
-
-#include "server/routes/index.h" // /
+#include "server/routes/index.h"        // /
 #include "server/routes/groups/index.h" // /groups
-#include "server/routes/slots/index.h" // slots
+#include "server/routes/slots/index.h"  // slots
 
 class ServerController
 {
@@ -18,9 +17,8 @@ public:
 
   AsyncWebServer server;
   Controller *controller;
-  
-private:
 
+private:
   // route registrtation callbacks
 
   // GET /
@@ -43,4 +41,14 @@ private:
 
   // // DELETE /groups/:id/:slotId --> delete slot
   // void DELETE_groups_id_slotId(AsyncWebServerRequest *request);
+
+  void onRequest(AsyncWebServerRequest *request)
+  {
+    // dummy callback function for handling params, etc.
+  }
+
+  void onFileUpload(AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final)
+  {
+    // dummy callback function signature, not in used in our code
+  }
 };

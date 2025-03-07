@@ -61,6 +61,8 @@ void HomeController::onDown()
   }
 
   *this->slotIndex = (*this->slotIndex + 1) % groups[*this->groupIndex].slotCount;
+
+  // this->controller->sendLight();
   // if (controller->mode == 1) // should we make all of these public?
   //   return;
 }
@@ -77,6 +79,7 @@ void HomeController::onUp()
     return;
   }
   *this->slotIndex = (*this->slotIndex - 1 + groups[*this->groupIndex].slotCount) % groups[*this->groupIndex].slotCount;
+  // this->controller->sendLight();
 }
 
 void HomeController::onScreenLeft()

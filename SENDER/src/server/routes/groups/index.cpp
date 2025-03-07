@@ -68,14 +68,15 @@ void GroupsRoute::GET_by_id(AsyncWebServerRequest *request)
     String path = request->url(); // Get full URL
     Serial.println("Full URL: " + path);
 
-    int id = path.substring(8).toInt();
+    int id = path.substring(8 + 4).toInt();
+    Serial.printf("Id = %d GroupCount = %d\n", id, groupCount);
     if (id < 0 || id >= groupCount)
     {
         request->send(400, "application/json", "{\"error\": \"Invalid group id\"}");
         return;
     }
 
-    String json = Controller::groupToJson(&groups[id]);
+    String json = Controller::groupToJson(&groups[id], id);
     request->send(200, "application/json", json);
 }
 
@@ -83,14 +84,38 @@ void GroupsRoute::GET_by_id(AsyncWebServerRequest *request)
  * Body:
  * {
  * "name": "Group name",
- * id: number // the index at which to insert the group. 
+ * id: number // the index at which to insert the group.
  * TODO: do a system where we can insert inbetween. Currently, we just override the group at the index.
  * }
  */
-void GroupsRoute::POST(AsyncWebServerRequest *request)
+void GroupsRoute::POST(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
 {
-    String path = request->url(); // Get full URL
-    Serial.println("Full URL: " + path);
+    //
+    // IMPORTANT NOTE
+    // `changeGroup` always has to be called before `changeSlot`
+    // as `changeGroup` will reset the slotIndex to 0.
+    //
+    // DynamicJsonDocument doc(200);
+    // DeserializationError error = deserializeJson(doc, (char *)data);
+    // if (!error)
+    // {
+    //     if (doc.containsKey("group"))
+    //     {
+    //         int groupIndex = doc["group"];
+    //         this->serverController->controller->changeGroup(groupIndex);
+    //     }
 
-    // get the name and id from the bpost request body
+    //     if (doc.containsKey("slot"))
+    //     {
+    //         int slotIndex = doc["slot"];
+    //         this->serverController->controller->changeSlot(slotIndex);
+    //     }
+
+    // }
+    // else
+    // {
+    //     Serial.println(error.c_str());
+    // }
+
+    // request->send(200, "application/json", "{\"message\": \"Changes applied.\"}");
 }

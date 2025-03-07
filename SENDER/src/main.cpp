@@ -329,8 +329,10 @@ void loop()
                 // button pressed
                 // controller.onSend();
                 Serial.println("[debug] Send Button Pressed");
-                Light displayLight = controller.getLight();
+
                 // Send message via ESP-NOW
+                Light displayLight = controller.getLight();
+
                 esp_err_t result = esp_now_send(0, (uint8_t *)&displayLight, sizeof(displayLight));
 
                 if (result == ESP_OK)
@@ -355,18 +357,8 @@ void loop()
             // button pressed
             controller.onSend();
             Serial.println("[debug] Send Button Pressed");
-            Light displayLight = controller.getLight();
-            // Send message via ESP-NOW
-            esp_err_t result = esp_now_send(0, (uint8_t *)&displayLight, sizeof(displayLight));
 
-            if (result == ESP_OK)
-            {
-                Serial.println("Sent with success");
-            }
-            else
-            {
-                Serial.println("Error sending the data");
-            }
+            // Send message via ESP-NOW
         }
     }
 

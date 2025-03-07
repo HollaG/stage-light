@@ -20,7 +20,7 @@ void ServerController::begin(Controller *controller)
 void ServerController::registerRoutes()
 {
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
 
     HomeRoute *home = new HomeRoute(this);
@@ -28,7 +28,7 @@ void ServerController::registerRoutes()
     SlotsRoute *slots = new SlotsRoute(this);
 
     // array of routes
-    BaseRoute *routes[] = {home, groups, slots};
+    BaseRoute *routes[] = {slots, groups, home};
 
     // for each route, register all verbs
     for (int i = 0; i < sizeof(routes) / sizeof(routes[0]); i++)
@@ -40,14 +40,15 @@ void ServerController::registerRoutes()
         server.on(route.c_str(), HTTP_GET, [routes, i](AsyncWebServerRequest *request)
                   { routes[i]->GET(request); });
 
-        server.on(route.c_str(), HTTP_POST, [routes, i](AsyncWebServerRequest *request)
-                  { routes[i]->POST(request); });
+        // server.on(route.c_str(), HTTP_POST, [routes, i](AsyncWebServerRequest *request)
+        //           { routes[i]->POST(request); });
+        server.on(route.c_str(), HTTP_POST, [routes, i](AsyncWebServerRequest *request) {}, [routes, i](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) {}, [routes, i](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+                  { routes[i]->POST(request, data, len, index, total); });
 
-        server.on(route.c_str(), HTTP_PUT, [routes, i](AsyncWebServerRequest *request)
-                  { routes[i]->PUT(request); });
-
-        server.on(route.c_str(), HTTP_DELETE, [routes, i](AsyncWebServerRequest *request)
-                  { routes[i]->DELETE(request); });
+        server.on(route.c_str(), HTTP_PUT, [routes, i](AsyncWebServerRequest *request) {}, [routes, i](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) {}, [routes, i](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+                  { routes[i]->PUT(request, data, len, index, total); });
+        server.on(route.c_str(), HTTP_DELETE, [routes, i](AsyncWebServerRequest *request) {}, [routes, i](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) {}, [routes, i](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+                  { routes[i]->DELETE(request, data, len, index, total); });
     }
 
     // Finally, create a route for each of the build artifacts.

@@ -3,7 +3,6 @@
 #include "server/routes/base.h"
 #include "server/ServerController.h"
 
-
 class GroupsRoute : public BaseRoute
 {
 public:
@@ -11,8 +10,7 @@ public:
 
     virtual std::string getRoute() override;
     virtual void GET(AsyncWebServerRequest *request) override;
-    virtual void POST(AsyncWebServerRequest *request) override;
-
+    virtual void POST(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) override;
 
     void GET_all(AsyncWebServerRequest *request);
     void GET_by_id(AsyncWebServerRequest *request);
